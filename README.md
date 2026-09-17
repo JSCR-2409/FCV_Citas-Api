@@ -16,4 +16,3 @@ Repositorio backend del proyecto. **No contiene implementación de negocio inici
 - `automations/n8n/`: JSON exportados en S5/S6.
 
 Lee el PRD en la carpeta raíz antes de inicializar Spring Boot.
-# FCV_Citas-Api
