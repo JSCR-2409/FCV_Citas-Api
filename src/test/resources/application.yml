@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:citas-test;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa.hibernate.ddl-auto: validate
+  flyway.enabled: true
+app.jwt.access-secret: test-access-secret-that-is-at-least-32-chars
+app.jwt.refresh-secret: test-refresh-secret-that-is-at-least-32-chars
+app.jwt.access-minutes: 15
+app.jwt.refresh-days: 7
