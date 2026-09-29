@@ -1,4 +1,15 @@
-package co.fcv.citas.auth; import jakarta.validation.Valid; import jakarta.validation.constraints.*; import org.springframework.http.*; import org.springframework.web.bind.annotation.*;
-@RestController @RequestMapping("/api/auth") public class AuthController { private final AuthService service; public AuthController(AuthService s){service=s;} @PostMapping("/register") ResponseEntity<Void> register(@Valid @RequestBody RegisterBody b){service.register(new AuthService.RegisterRequest(b.names,b.surnames,b.documentType,b.documentNumber,b.email,b.phone,b.password));return ResponseEntity.status(HttpStatus.CREATED).build();} @PostMapping("/login") AuthService.TokenResponse login(@Valid @RequestBody LoginBody b){return service.login(new AuthService.LoginRequest(b.email,b.password));} @PostMapping("/refresh") AuthService.TokenResponse refresh(@Valid @RequestBody RefreshBody b){return service.refresh(b.refreshToken);} @PostMapping("/logout") ResponseEntity<Void> logout(@Valid @RequestBody RefreshBody b){service.logout(b.refreshToken);return ResponseEntity.noContent().build();}
- public static class RegisterBody{@NotBlank public String names;@NotBlank public String surnames;@NotBlank public String documentType;@NotBlank public String documentNumber;@Email @NotBlank public String email;@NotBlank public String phone;@NotBlank public String password;} public static class LoginBody{@Email @NotBlank public String email;@NotBlank public String password;} public static class RefreshBody{@NotBlank public String refreshToken;}
+package co.fcv.citas.auth;
+import jakarta.validation.Valid; import jakarta.validation.constraints.*; import org.springframework.http.*; import org.springframework.web.bind.annotation.*;
+@RestController @RequestMapping("/api/auth") public class AuthController { private final AuthService service; public AuthController(AuthService s){service=s;}
+ @PostMapping("/register") ResponseEntity<Void> register(@Valid @RequestBody RegisterBody b){service.register(new AuthService.RegisterRequest(b.names,b.surnames,b.documentType,b.documentNumber,b.email,b.phone,b.password));return ResponseEntity.status(HttpStatus.CREATED).build();}
+ @PostMapping("/login") AuthService.TokenResponse login(@Valid @RequestBody LoginBody b){return service.login(new AuthService.LoginRequest(b.email,b.password));}
+ @PostMapping("/refresh") AuthService.TokenResponse refresh(@Valid @RequestBody RefreshBody b){return service.refresh(b.refreshToken);}
+ @PostMapping("/logout") ResponseEntity<Void> logout(@Valid @RequestBody RefreshBody b){service.logout(b.refreshToken);return ResponseEntity.noContent().build();}
+ @PostMapping("/password-reset") ResponseEntity<Void> reset(@Valid @RequestBody ResetBody b){service.resetPassword(b.email,b.password);return ResponseEntity.noContent().build();}
+ @PostMapping("/recovery/request") ResponseEntity<Void> recovery(@Valid @RequestBody EmailBody b){service.verifyRecoveryAccount(b.email);return ResponseEntity.noContent().build();}
+ public static class RegisterBody{@NotBlank public String names;@NotBlank public String surnames;@NotBlank public String documentType;@NotBlank public String documentNumber;@Email @NotBlank public String email;@NotBlank public String phone;@NotBlank public String password;}
+ public static class LoginBody{@Email @NotBlank public String email;@NotBlank public String password;}
+ public static class RefreshBody{@NotBlank public String refreshToken;}
+ public static class ResetBody{@Email @NotBlank public String email;@NotBlank public String password;}
+ public static class EmailBody{@Email @NotBlank public String email;}
 }

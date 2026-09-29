@@ -30,6 +30,7 @@ public class User {
   public Long getId() { return id; }
   public String getEmail() { return email; }
   public String getPasswordHash() { return passwordHash; }
+  public void changePassword(String encodedPassword) { this.passwordHash = encodedPassword; }
   public boolean isActive() { return active; }
   public void addRole(Role role) { roles.add(role); }
   public String getPrimaryRole() { return roles.stream().map(Role::getCode).sorted().findFirst().orElse("USER"); }
