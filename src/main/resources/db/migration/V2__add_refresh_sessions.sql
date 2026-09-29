@@ -1,0 +1,1 @@
+CREATE TABLE refresh_sessions (id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id BIGINT UNSIGNED NOT NULL,token_hash CHAR(64) NOT NULL,expires_at TIMESTAMP(6) NOT NULL,revoked BOOLEAN NOT NULL,CONSTRAINT uk_refresh_hash UNIQUE(token_hash),CONSTRAINT fk_refresh_user FOREIGN KEY(user_id) REFERENCES users(id));

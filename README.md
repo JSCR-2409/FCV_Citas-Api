@@ -16,3 +16,7 @@ Repositorio backend del proyecto. **No contiene implementación de negocio inici
 - `automations/n8n/`: JSON exportados en S5/S6.
 
 Lee el PRD en la carpeta raíz antes de inicializar Spring Boot.
+
+## Desarrollo con Docker
+
+Desde la raíz del workspace, `docker compose up -d` arranca MySQL, esta API y Angular. La salud de la API se expone en `http://localhost:8080/actuator/health`; el origen CORS de desarrollo es `http://localhost:4200`, configurable mediante `FRONTEND_ORIGIN`.

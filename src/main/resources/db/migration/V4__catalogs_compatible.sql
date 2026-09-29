@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS appointment_statuses (id SMALLINT AUTO_INCREMENT PRIMARY KEY, code VARCHAR(40) NOT NULL UNIQUE, name VARCHAR(80) NOT NULL, is_terminal BOOLEAN NOT NULL DEFAULT FALSE);
+CREATE TABLE IF NOT EXISTS reschedule_request_statuses (id SMALLINT AUTO_INCREMENT PRIMARY KEY, code VARCHAR(40) NOT NULL UNIQUE, name VARCHAR(80) NOT NULL, is_terminal BOOLEAN NOT NULL DEFAULT FALSE);
+CREATE TABLE IF NOT EXISTS insurance_regimes (id SMALLINT AUTO_INCREMENT PRIMARY KEY, code VARCHAR(30) NOT NULL UNIQUE, name VARCHAR(80) NOT NULL);
+CREATE TABLE IF NOT EXISTS locations (id SMALLINT AUTO_INCREMENT PRIMARY KEY, code VARCHAR(30) NOT NULL UNIQUE, name VARCHAR(180) NOT NULL, address VARCHAR(255) NOT NULL, city VARCHAR(100) NOT NULL, department VARCHAR(100) NOT NULL, active BOOLEAN NOT NULL DEFAULT TRUE);
+CREATE TABLE IF NOT EXISTS specialties (id SMALLINT AUTO_INCREMENT PRIMARY KEY, code VARCHAR(50) NOT NULL UNIQUE, name VARCHAR(150) NOT NULL UNIQUE, appointment_duration_minutes SMALLINT NOT NULL, is_general BOOLEAN NOT NULL DEFAULT FALSE, requires_admin_approval BOOLEAN NOT NULL DEFAULT TRUE, active BOOLEAN NOT NULL DEFAULT TRUE, CONSTRAINT ck_specialty_duration CHECK (appointment_duration_minutes IN (30,60)));
+INSERT INTO appointment_statuses (code,name,is_terminal) SELECT 'REQUESTED','Solicitada',FALSE WHERE NOT EXISTS (SELECT 1 FROM appointment_statuses);
+INSERT INTO appointment_statuses (code,name,is_terminal) SELECT 'APPROVED','Aprobada',FALSE WHERE NOT EXISTS (SELECT 1 FROM appointment_statuses WHERE code='APPROVED');
+INSERT INTO reschedule_request_statuses (code,name,is_terminal) SELECT 'PENDING','Pendiente',FALSE WHERE NOT EXISTS (SELECT 1 FROM reschedule_request_statuses);
+INSERT INTO insurance_regimes (code,name) SELECT 'CONTRIBUTORY','Contributivo' WHERE NOT EXISTS (SELECT 1 FROM insurance_regimes);
+INSERT INTO locations (code,name,address,city,department) SELECT 'HIC','Hospital Internacional de Colombia (HIC)','Km 7 Autopista Bucaramanga–Piedecuesta','Piedecuesta','Santander' WHERE NOT EXISTS (SELECT 1 FROM locations);
+INSERT INTO locations (code,name,address,city,department) SELECT 'ICV','Instituto Cardiovascular (ICV)','Calle 155A No. 23-58','Floridablanca','Santander' WHERE NOT EXISTS (SELECT 1 FROM locations WHERE code='ICV');

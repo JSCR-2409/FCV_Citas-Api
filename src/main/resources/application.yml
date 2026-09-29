@@ -9,10 +9,11 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+    baseline-on-migrate: true
 app:
   jwt:
     access-secret: ${JWT_ACCESS_SECRET:development-access-secret-change-me-32}
     refresh-secret: ${JWT_REFRESH_SECRET:development-refresh-secret-change-me-32}
     access-minutes: ${JWT_ACCESS_MINUTES:15}
     refresh-days: ${JWT_REFRESH_DAYS:7}
-  frontend-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+  frontend-origin: ${FRONTEND_ORIGIN:http://localhost:4200}
