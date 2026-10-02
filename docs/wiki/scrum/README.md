@@ -75,9 +75,13 @@ Estado del backlog al 2026-10-02, tras la verificación del alcance S3:
 
 | Estado | HU | Criterio |
 |---|---|---|
-| `Completada` | HU-019, HU-020, HU-021, HU-027, HU-028 | CA verificados con pruebas automatizadas y DoD cumplida, incluida la UI correspondiente |
+| `Completada` | HU-019, HU-020, HU-021, HU-024, HU-027, HU-028, HU-029, HU-030 | CA verificados con pruebas automatizadas y DoD cumplida, incluida la UI correspondiente |
 | `En validación` | HU-009, HU-012, HU-013, HU-014, HU-015, HU-016, HU-017, HU-018 | CA de backend verificados con pruebas automatizadas; la DoD queda parcial porque falta la UI |
-| `Pendiente de aprobación` | las 21 restantes | Sin abordar; corresponden a S4 y S5 |
+| `Pendiente de aprobación` | las 18 restantes | Sin abordar; corresponden a S4 y S5 |
 
 La evidencia de cada HU vive en su propia tabla **Evidencia de validación**, con el nombre de la
-prueba que respalda cada criterio. La suite de backend es de 59 pruebas y está en verde.
+prueba que respalda cada criterio. La suite de backend es de 83 pruebas y está en verde.
+
+HU-024, HU-029 y HU-030 pertenecen a S4, pero se abordaron al detectar que la reprogramación no
+existía en ninguna capa. Cada una se validó con sus propias pruebas, conforme a la regla de
+`PLAN_AJUSTADO_S3_S5.md` de no fusionar las tres en un mismo bloque de verificación.

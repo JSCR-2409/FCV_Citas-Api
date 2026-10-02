@@ -2,7 +2,7 @@
 id: HU-024
 tipo: historia-de-usuario
 titulo: "Solicitar reprogramación"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-005-ciclo-de-citas-del-usuario]]"
 esfuerzo: Muy alto
 sprint_sugerido: "Incremento IV — Reserva del usuario"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-029-consultar-bandeja-reprogramaciones]]", "[[HU-030-resolv
 **Nivel:** Muy alto. Reúne dos franjas, estados coordinados, retención y reglas de preservación; se divide con la decisión ADMIN en HU-030.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Modelar solicitud PENDING y vínculos original/propuesta.** Dificultad: Alto. Mantener 3FN y retención clara.
-- [ ] **T-02 — Implementar validación y retención atómica de nueva franja.** Dificultad: Alto. Proteger contra doble reserva.
-- [ ] **T-03 — Integrar selección UI, detalle y pruebas de preservación.** Dificultad: Alto. Explicar estado PENDING al USER.
+- [x] **T-01 — Modelar solicitud PENDING y vínculos original/propuesta.** Dificultad: Alto. Mantener 3FN y retención clara.
+- [x] **T-02 — Implementar validación y retención atómica de nueva franja.** Dificultad: Alto. Proteger contra doble reserva.
+- [x] **T-03 — Integrar selección UI, detalle y pruebas de preservación.** Dificultad: Alto. Explicar estado PENDING al USER.
 
 ## Criterios de aceptación
 ### CA-01 — Elegibilidad
@@ -46,21 +46,22 @@ Dado una solicitud PENDING creada, cuando se consulta agenda, entonces la nueva 
 Dado un intento de reprogramar cita no aprobada/no futura o cambiar profesional, cuando se confirma, entonces se rechaza o se indica que es nueva cita según contrato.
 
 ## Definition of Done
-- [ ] CA-01 a CA-03 tienen pruebas de reglas, concurrencia y persistencia/REST/UI.
-- [ ] Solicitud, retenciones y relación con cita original tienen Flyway/índices y no rompen 3FN.
-- [ ] La decisión ADMIN permanece separada en [[HU-030-resolver-reprogramacion]] y el contrato comunica PENDING/conflictos.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] CA-01 a CA-03 tienen pruebas de reglas, concurrencia y persistencia/REST/UI.
+- [x] Solicitud, retenciones y relación con cita original tienen Flyway/índices y no rompen 3FN.
+- [x] La decisión ADMIN permanece separada en [[HU-030-resolver-reprogramacion]] y el contrato comunica PENDING/conflictos.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ReschedulingTest.hu024_ca01_anApprovedFutureAppointmentCanBeRescheduled, hu024_ca01_onlyOnePendingRequestPerAppointment y hu024_ca01_aSixtyMinuteAppointmentNeedsTwoConsecutiveSlots | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | ReschedulingTest.hu024_ca02_bothSlotsStayHeldWhilePending y hu024_ca02_aHeldProposalIsNotOfferedToAnyoneElse | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | ReschedulingTest.hu024_ca03_onlyApprovedAppointmentsCanBeRescheduled, hu024_ca03_aPastAppointmentCannotBeRescheduled, hu024_ca03_changingProfessionalIsNotARescheduling y hu024_ca03_anotherPatientCannotRescheduleMyAppointment | Verificado el 2026-10-02 |
+| DoD | Cumplida: contrato reprogramaciones-rest.md 1.0, retencion doble sin columnas nuevas y UI de solicitud en el portal del paciente | Suite de 83 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: caducidad de retención PENDING y semántica exacta de “futura”.

@@ -2,7 +2,7 @@
 id: HU-029
 tipo: historia-de-usuario
 titulo: "Consultar bandeja de reprogramaciones"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-007-operacion-administrativa-y-auditoria]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento V — Operación clínica simulada"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-030-resolver-reprogramacion]]"]
 **Nivel:** Medio. Es lectura comparativa autorizada de dos franjas relacionadas.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Definir proyección original/propuesta y filtros.** Dificultad: Medio. No exponer atributos ajenos innecesarios.
-- [ ] **T-02 — Implementar consulta ADMIN de estado PENDING.** Dificultad: Medio. Aplicar índices si se necesitan.
-- [ ] **T-03 — Integrar bandeja y pruebas de filtros/privacidad.** Dificultad: Medio. Tratar estado vacío.
+- [x] **T-01 — Definir proyección original/propuesta y filtros.** Dificultad: Medio. No exponer atributos ajenos innecesarios.
+- [x] **T-02 — Implementar consulta ADMIN de estado PENDING.** Dificultad: Medio. Aplicar índices si se necesitan.
+- [x] **T-03 — Integrar bandeja y pruebas de filtros/privacidad.** Dificultad: Medio. Tratar estado vacío.
 
 ## Criterios de aceptación
 ### CA-01 — Solicitudes PENDING
@@ -46,21 +46,22 @@ Dado una reprogramación pendiente, cuando se ve su detalle, entonces presenta p
 Dado filtros de sede, profesional, especialidad o fecha, cuando se aplican, entonces delimitan resultados; otros roles no acceden.
 
 ## Definition of Done
-- [ ] CA-01 a CA-03 tienen pruebas de estado, proyección, filtros y RBAC/UI aplicable.
-- [ ] El contrato no revela información fuera del propósito administrativo y documenta consulta vacía/error.
-- [ ] Índices/migración Flyway existen si la implementación modifica esquema.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] CA-01 a CA-03 tienen pruebas de estado, proyección, filtros y RBAC/UI aplicable.
+- [x] El contrato no revela información fuera del propósito administrativo y documenta consulta vacía/error.
+- [x] Índices/migración Flyway existen si la implementación modifica esquema.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ReschedulingTest.hu029_ca01_trayShowsOnlyPendingRequests | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | ReschedulingTest.hu029_ca02_trayCompareBothSlotsAndKeepsProfessionalAndSpecialty | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | ReschedulingTest.hu029_ca03_trayAppliesFiltersAndRejectsOtherRoles | Verificado el 2026-10-02 |
+| DoD | Cumplida: pruebas REST, filtros de sede, profesional, especialidad y fecha, y bandeja real en el portal administrativo | Suite de 83 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: orden/paginación y atributos exactos requeridos para comparación.

@@ -61,3 +61,34 @@ usuario autenticado.
 **HECHO:** Eliminado código muerto del prototipo: `loginAs()` con tres perfiles ficticios,
 `addAppointment()` y `cancelAppointment()` locales, y el bloque inalcanzable tras un `return` en
 `handleBookAppointment`.
+
+# 2026-10-02 — Reprogramación de citas (HU-024, HU-029, HU-030)
+
+**HECHO:** La reprogramación no existía en ninguna capa: sin endpoints, sin UI y sin contrato. La
+tabla `reschedule_requests` existía desde `V7` pero nada la leía ni la escribía. Implementadas las
+tres HU con 22 pruebas, una por criterio y varias por regla.
+
+**DECISIÓN:** La retención doble de RN-10 se resuelve sin columnas nuevas: mientras la solicitud
+está `PENDING`, los slots propuestos se marcan con el mismo `appointment_id` de la cita, así que
+esta retiene su franja original y la propuesta, y ningún otro paciente puede tomarlas. Qué franja es
+cada una se deduce de `previous_*` y `requested_*` de la solicitud, lo que permite liberar
+exactamente el lado que corresponde al decidir. Cuando las dos franjas se solapan, el slot
+compartido no se libera.
+
+**HECHO:** Añadida una guarda que rechaza con `409` aprobar una propuesta cuya franja ya no está
+retenida por la cita. Lo detectó la verificación en vivo: la fila que el seed trae en
+`reschedule_requests` se insertó sin reservar su franja, de modo que aprobarla habría movido la cita
+a un slot libre que otro paciente podía reservar.
+
+**HECHO:** Cancelar una cita con reprogramación `PENDING` libera ambas franjas y pasa la solicitud a
+`CANCELLED`. Migración `V9` siembra ese estado, que ni `V4` ni `V8` incluían.
+
+**HECHO:** `GET /api/v1/me/appointments` expone `professionalId`, `specialtyId` y `durationMinutes`.
+Sin ellos la UI no podía consultar franjas del mismo profesional, que es lo que la regla exige.
+
+**HECHO:** El portal del paciente nunca tuvo listado de citas: la tarjeta mostraba `apps[0]` sobre
+una lista ordenada de forma descendente, así que presentaba la cita más lejana como la siguiente, y
+el contador de próximas incluía las canceladas. Añadido el listado completo separado en próximas e
+historial, con los seis estados del PRD traducidos y 6 pruebas de la clasificación.
+
+**Contrato:** nuevo `docs/contratos/reprogramaciones-rest.md` versión 1.0.
