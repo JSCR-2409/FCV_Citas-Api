@@ -2,7 +2,7 @@
 id: HU-013
 tipo: historia-de-usuario
 titulo: "Crear profesional"
-estado: En validación
+estado: Completada
 epica: "[[EP-003-catalogos-y-gestion-de-profesionales]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -46,22 +46,23 @@ Dado visitante, USER o PROFESSIONAL, cuando intenta crear un profesional, entonc
 Dado el profesional creado, cuando se revisan sus datos, entonces son sintéticos y no corresponden a información privada real.
 
 ## Definition of Done
-- [ ] CA-01 a CA-03 tienen pruebas RBAC, unicidad y REST/UI aplicable.
-- [ ] El diseño modela al profesional como usuario especializado en 3FN y tiene Flyway si aplica.
-- [ ] El contrato no expone credenciales ni obliga a una asignación no aprobada.
+- [x] CA-01 a CA-03 tienen pruebas RBAC, unicidad y REST/UI aplicable.
+- [x] El diseño modela al profesional como usuario especializado en 3FN y tiene Flyway si aplica.
+- [x] El contrato no expone credenciales ni obliga a una asignación no aprobada.
 - [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Cumplido | ProfessionalManagementTest.hu013_ca01_adminCreatesProfessionalWithItsRole | Verificado el 2026-10-02 |
-| CA-02 | Cumplido | ProfessionalManagementTest.hu013_ca02_onlyAdminCanCreateProfessionals y hu013_ca02_duplicatedIdentifiersAreRejected | Verificado el 2026-10-02 |
-| CA-03 | Cumplido | ProfessionalManagementTest.hu013_ca01_passwordIsNeverReturnedNorStoredInClear; datos sinteticos @test.local | Verificado el 2026-10-02 |
-| DoD | Parcial: CA verificados; falta UI de creacion de profesionales | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
+| CA-01 | Cumplido | ProfessionalManagementTest.hu013_ca01_adminCreatesProfessionalWithItsRole y hu013_ca01_adminListsProfessionalsWithTheirAssignments | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | ProfessionalManagementTest.hu013_ca02_onlyAdminCanCreateProfessionals, hu013_ca02_duplicatedIdentifiersAreRejected y hu013_ca02_onlyAdminCanListProfessionals | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | ProfessionalManagementTest.hu013_ca01_passwordIsNeverReturnedNorStoredInClear; datos sinteticos | Verificado el 2026-10-02 |
+| DoD | Cumplida: formulario de alta en el portal administrativo | Suite de 88 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
 - 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
+- 2026-10-02 — UI conectada al backend; DoD completada y HU pasa a `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: formato/unicidad precisa de código profesional y matrícula.

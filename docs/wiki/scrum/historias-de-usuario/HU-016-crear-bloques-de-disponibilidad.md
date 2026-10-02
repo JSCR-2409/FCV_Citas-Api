@@ -2,7 +2,7 @@
 id: HU-016
 tipo: historia-de-usuario
 titulo: "Crear bloques de disponibilidad"
-estado: En validación
+estado: Completada
 epica: "[[EP-004-disponibilidad-y-busqueda-de-horarios]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento III — Oferta de agenda"
@@ -46,9 +46,9 @@ Dado una fecha pasada, sede no asignada o intervalo solapado, cuando intenta cre
 Dado el mismo día, cuando crea 08:00–12:00 y 14:00–17:00 en HIC, entonces ambos bloques son válidos y el intervalo intermedio no se ofrece.
 
 ## Definition of Done
-- [ ] CA-01 a CA-03 tienen pruebas de dominio/aplicación/REST y UI calendario aplicable.
-- [ ] Datos de bloques/slots tienen migración Flyway e índices pertinentes si se implementan.
-- [ ] Autorización/ownership del profesional y contrato REST directo están verificados.
+- [x] CA-01 a CA-03 tienen pruebas de dominio/aplicación/REST y UI calendario aplicable.
+- [x] Datos de bloques/slots tienen migración Flyway e índices pertinentes si se implementan.
+- [x] Autorización/ownership del profesional y contrato REST directo están verificados.
 - [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
@@ -57,11 +57,12 @@ Dado el mismo día, cuando crea 08:00–12:00 y 14:00–17:00 en HIC, entonces a
 | CA-01 | Cumplido | AvailabilityBlockTest.hu016_ca01_blockIsSplitIntoThirtyMinuteSlots | Verificado el 2026-10-02 |
 | CA-02 | Cumplido | AvailabilityBlockTest.hu016_ca02_pastDateIsRejected, hu016_ca02_siteNotAssignedIsRejected, hu016_ca02_boundariesMustAlignToThirtyMinutes y hu016_ca02_overlappingBlockIsRejectedWithoutTouchingTheAgenda | Verificado el 2026-10-02 |
 | CA-03 | Cumplido | AvailabilityBlockTest.hu016_ca03_twoBlocksTheSameDayAndTheGapIsNotOffered | Verificado el 2026-10-02 |
-| DoD | Parcial: CA verificados; falta UI de gestion de bloques en el portal profesional | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
+| DoD | Cumplida: alta de bloques desde el portal del profesional | Suite de 88 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
 - 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
+- 2026-10-02 — UI conectada al backend; DoD completada y HU pasa a `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: zona horaria, granularidad de límites y estrategia de concurrencia de bloques.

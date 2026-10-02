@@ -2,7 +2,7 @@
 id: HU-015
 tipo: historia-de-usuario
 titulo: "Asignar sedes y estado al profesional"
-estado: En validación
+estado: Completada
 epica: "[[EP-003-catalogos-y-gestion-de-profesionales]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -46,9 +46,9 @@ Dado una sede no asociada, cuando el profesional intenta crear bloque allí, ent
 Dado un profesional desactivado, cuando intenta operar una capacidad restringida o se ofrece para disponibilidad, entonces se aplica la restricción aprobada por contrato.
 
 ## Definition of Done
-- [ ] CA-01 a CA-03 tienen pruebas de asociación, RBAC y uso por disponibilidad.
-- [ ] El estado/relación conserva 3FN y Flyway cuando se modifica esquema.
-- [ ] Los efectos de desactivar con citas/bloques existentes están documentados o bloqueados como decisión pendiente.
+- [x] CA-01 a CA-03 tienen pruebas de asociación, RBAC y uso por disponibilidad.
+- [x] El estado/relación conserva 3FN y Flyway cuando se modifica esquema.
+- [x] Los efectos de desactivar con citas/bloques existentes están documentados o bloqueados como decisión pendiente.
 - [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
@@ -57,11 +57,12 @@ Dado un profesional desactivado, cuando intenta operar una capacidad restringida
 | CA-01 | Cumplido | ProfessionalManagementTest.hu015_ca01_assignsBothFixedSites | Verificado el 2026-10-02 |
 | CA-02 | Cumplido | AvailabilityBlockTest.hu016_ca02_siteNotAssignedIsRejected | Verificado el 2026-10-02 |
 | CA-03 | Cumplido | ProfessionalManagementTest.hu015_ca03_deactivatedProfessionalIsNotOfferedNorCanPublish | Verificado el 2026-10-02 |
-| DoD | Parcial: CA verificados; falta UI de sedes y estado operativo | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
+| DoD | Cumplida: seleccion de sedes y conmutador de estado en el portal administrativo | Suite de 88 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
 - 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
+- 2026-10-02 — UI conectada al backend; DoD completada y HU pasa a `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: efecto de la desactivación sobre bloques y citas existentes/futuras.

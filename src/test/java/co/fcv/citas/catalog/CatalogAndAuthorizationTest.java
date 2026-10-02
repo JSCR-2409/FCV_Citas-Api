@@ -148,4 +148,60 @@ class CatalogAndAuthorizationTest {
                 + "\"general\":false,\"requiresAdminApproval\":true}"))
         .andExpect(status().isBadRequest());
   }
+
+  /** CA-01 dice "crea o actualiza": la restriccion aplica tambien al PATCH, no solo al alta. */
+  @Test
+  void hu012_ca01_updatingToAnInvalidDurationIsRejected() throws Exception {
+    String created = mvc.perform(post("/api/v1/admin/specialties").header(HttpHeaders.AUTHORIZATION, admin)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"code\":\"CAT_UPD_30\",\"name\":\"Actualizable 30\",\"durationMinutes\":30,"
+                + "\"general\":false,\"requiresAdminApproval\":true}"))
+        .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+    Assertions.assertTrue(created.contains("CAT_UPD_30"));
+    long id = db.queryForObject("SELECT id FROM specialties WHERE code=?", Long.class, "CAT_UPD_30");
+
+    mvc.perform(patch("/api/v1/admin/specialties/" + id).header(HttpHeaders.AUTHORIZATION, admin)
+            .contentType(MediaType.APPLICATION_JSON).content("{\"durationMinutes\":45}"))
+        .andExpect(status().isBadRequest());
+    Assertions.assertEquals(30, db.queryForObject(
+        "SELECT appointment_duration_minutes FROM specialties WHERE id=?", Integer.class, id).intValue());
+
+    mvc.perform(patch("/api/v1/admin/specialties/" + id).header(HttpHeaders.AUTHORIZATION, admin)
+            .contentType(MediaType.APPLICATION_JSON).content("{\"durationMinutes\":60}"))
+        .andExpect(status().isOk());
+    Assertions.assertEquals(60, db.queryForObject(
+        "SELECT appointment_duration_minutes FROM specialties WHERE id=?", Integer.class, id).intValue());
+  }
+
+  /** HU-012 CA-02: una especialidad referenciada se desactiva, no se borra, y el ADMIN la ve. */
+  @Test
+  void hu012_ca02_adminSeesInactiveSpecialtiesToReactivateThem() throws Exception {
+    mvc.perform(post("/api/v1/admin/specialties").header(HttpHeaders.AUTHORIZATION, admin)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"code\":\"CAT_OFF_30\",\"name\":\"Desactivable 30\",\"durationMinutes\":30,"
+                + "\"general\":false,\"requiresAdminApproval\":true}"))
+        .andExpect(status().isCreated());
+    long id = db.queryForObject("SELECT id FROM specialties WHERE code=?", Long.class, "CAT_OFF_30");
+
+    mvc.perform(patch("/api/v1/admin/specialties/" + id).header(HttpHeaders.AUTHORIZATION, admin)
+            .contentType(MediaType.APPLICATION_JSON).content("{\"active\":false}"))
+        .andExpect(status().isOk());
+
+    // El catalogo publico ya no la ofrece...
+    String publicCatalog = mvc.perform(get("/api/v1/catalogs/specialties")
+            .header(HttpHeaders.AUTHORIZATION, patient))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    Assertions.assertFalse(publicCatalog.contains("CAT_OFF_30"));
+
+    // ...pero el ADMIN si, para poder reactivarla.
+    String adminCatalog = mvc.perform(get("/api/v1/admin/specialties").header(HttpHeaders.AUTHORIZATION, admin))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    Assertions.assertTrue(adminCatalog.contains("CAT_OFF_30"));
+  }
+
+  @Test
+  void hu012_ca02_onlyAdminCanListEverySpecialty() throws Exception {
+    mvc.perform(get("/api/v1/admin/specialties").header(HttpHeaders.AUTHORIZATION, patient))
+        .andExpect(status().isForbidden());
+  }
 }

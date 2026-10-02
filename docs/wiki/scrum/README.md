@@ -75,12 +75,15 @@ Estado del backlog al 2026-10-02, tras la verificación del alcance S3:
 
 | Estado | HU | Criterio |
 |---|---|---|
-| `Completada` | HU-019, HU-020, HU-021, HU-024, HU-027, HU-028, HU-029, HU-030 | CA verificados con pruebas automatizadas y DoD cumplida, incluida la UI correspondiente |
-| `En validación` | HU-009, HU-012, HU-013, HU-014, HU-015, HU-016, HU-017, HU-018 | CA de backend verificados con pruebas automatizadas; la DoD queda parcial porque falta la UI |
+| `Completada` | HU-009, HU-012 a HU-021, HU-024, HU-027 a HU-030 | CA verificados con pruebas automatizadas y DoD cumplida, incluida la UI correspondiente |
 | `Pendiente de aprobación` | las 18 restantes | Sin abordar; corresponden a S4 y S5 |
 
+Con esto **el alcance funcional de S3 queda cerrado**: administración de profesionales y
+asignaciones, gestión de bloques de disponibilidad, consulta de disponibilidad, cita general
+auto-aprobada, cita especializada en `REQUESTED` y resolución por el ADMIN, cada una con su UI.
+
 La evidencia de cada HU vive en su propia tabla **Evidencia de validación**, con el nombre de la
-prueba que respalda cada criterio. La suite de backend es de 83 pruebas y está en verde.
+prueba que respalda cada criterio. La suite de backend es de 88 pruebas y está en verde.
 
 HU-024, HU-029 y HU-030 pertenecen a S4, pero se abordaron al detectar que la reprogramación no
 existía en ninguna capa. Cada una se validó con sus propias pruebas, conforme a la regla de

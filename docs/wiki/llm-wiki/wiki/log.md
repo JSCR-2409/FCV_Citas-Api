@@ -92,3 +92,33 @@ el contador de próximas incluía las canceladas. Añadido el listado completo s
 historial, con los seis estados del PRD traducidos y 6 pruebas de la clasificación.
 
 **Contrato:** nuevo `docs/contratos/reprogramaciones-rest.md` versión 1.0.
+
+# 2026-10-02 — Cierre funcional de S3: portal profesional y CRUD administrativo
+
+**HECHO:** El portal del profesional no hacia ninguna llamada al backend: mostraba ocho pacientes
+inventados en el componente y sus acciones solo movian signals locales. Ahora cubre HU-016, HU-017
+y HU-018 contra los endpoints ya probados, y lee las sedes de `/api/v1/catalogs/locations` en lugar
+de codificarlas. Es el primer consumo real de un endpoint de catalogo: los seis existian sin usarse.
+
+**HECHO:** Eliminados del portal profesional los modales de historia clinica y evolucion. El PRD
+excluye explicitamente historia clinica y diagnosticos del alcance, y no guardaban nada.
+
+**DECISIÓN:** Lo que no existe se declara en lugar de simularse. El portal profesional indica que la
+agenda de pacientes es HU-025 y el cierre de atencion HU-026; el portal administrativo indica que
+EPS y planes son HU-010 y HU-011 y la auditoria HU-031. Antes esos espacios mostraban datos
+fabricados que parecian reales.
+
+**HECHO:** Dos endpoints de lectura que faltaban y sin los cuales la administracion era imposible:
+`GET /api/v1/admin/professionals`, con las asignaciones agrupadas e incluyendo los inactivos que hay
+que poder reactivar, y `GET /api/v1/admin/specialties`, que a diferencia del catalogo publico
+devuelve tambien las desactivadas.
+
+**HECHO:** Corregido un defecto en `PATCH /api/v1/admin/specialties/{id}`: no validaba la duracion,
+asi que aceptaba 45 minutos pese a que HU-012 CA-01 dice "crea o actualiza". La prueba anterior solo
+cubria el alta. Suite de 83 a 88 pruebas.
+
+**HECHO:** El portal administrativo cubre HU-012 alta, cambio de duracion y desactivacion de
+especialidades; HU-013 alta de profesionales; HU-014 asignacion de especialidades forzando una sola
+principal en la propia UI; y HU-015 seleccion de sedes y conmutador de estado operativo.
+
+**HECHO:** Backlog: 16 HU `Completada`, ninguna en validacion, 18 pendientes de S4 y S5.

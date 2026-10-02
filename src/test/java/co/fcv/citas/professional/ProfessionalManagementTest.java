@@ -120,6 +120,38 @@ class ProfessionalManagementTest {
         .andExpect(status().isConflict());
   }
 
+  /**
+   * Sin listado el ADMIN no puede administrar: no sabe que profesionales existen ni que tienen
+   * asignado. Debe incluir los inactivos, que son los que hay que poder reactivar.
+   */
+  @Test
+  void hu013_ca01_adminListsProfessionalsWithTheirAssignments() throws Exception {
+    adminCall("PUT", "/api/v1/admin/professionals/" + professional + "/specialties",
+        "{\"assignments\":[{\"id\":" + activeSpecialty + ",\"primary\":true}]}")
+        .andExpect(status().isOk());
+
+    String body = mvc.perform(get("/api/v1/admin/professionals").header(HttpHeaders.AUTHORIZATION, admin))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+    Assertions.assertTrue(body.contains("\"professionalCode\":\"PM-PROF-1\""));
+    Assertions.assertTrue(body.contains("\"name\":\"Gestion activa 30\""), "debe traer sus especialidades");
+    Assertions.assertTrue(body.contains("Hospital Internacional de Colombia (HIC)"), "y sus sedes");
+
+    adminCall("PATCH", "/api/v1/admin/professionals/" + professional + "/active", "{\"active\":false}")
+        .andExpect(status().isOk());
+    String afterDeactivation = mvc.perform(get("/api/v1/admin/professionals")
+            .header(HttpHeaders.AUTHORIZATION, admin))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    Assertions.assertTrue(afterDeactivation.contains("\"professionalCode\":\"PM-PROF-1\""),
+        "un profesional desactivado sigue listandose para poder reactivarlo");
+  }
+
+  @Test
+  void hu013_ca02_onlyAdminCanListProfessionals() throws Exception {
+    mvc.perform(get("/api/v1/admin/professionals").header(HttpHeaders.AUTHORIZATION, patient))
+        .andExpect(status().isForbidden());
+  }
+
   @Test
   void hu014_ca01_assignsSeveralSpecialtiesWithoutDuplicates() throws Exception {
     adminCall("PUT", "/api/v1/admin/professionals/" + professional + "/specialties",

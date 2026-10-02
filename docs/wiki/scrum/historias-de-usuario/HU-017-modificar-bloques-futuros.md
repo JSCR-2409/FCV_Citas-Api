@@ -2,7 +2,7 @@
 id: HU-017
 tipo: historia-de-usuario
 titulo: "Modificar bloques futuros"
-estado: En validación
+estado: Completada
 epica: "[[EP-004-disponibilidad-y-busqueda-de-horarios]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento III — Oferta de agenda"
@@ -46,9 +46,9 @@ Dado un bloque con cita comprometida, cuando se intenta editar o eliminar, enton
 Dado un bloque pasado o de otro profesional, cuando se intenta mutar, entonces se rechaza sin efecto.
 
 ## Definition of Done
-- [ ] CA-01 a CA-03 tienen pruebas de estados de reserva, ownership y REST/UI aplicable.
-- [ ] Si existe actualización de slots, esta es transaccional y tiene migración Flyway si cambia esquema.
-- [ ] La definición de “comprometida” está aprobada o registrada como bloqueo no implementable.
+- [x] CA-01 a CA-03 tienen pruebas de estados de reserva, ownership y REST/UI aplicable.
+- [x] Si existe actualización de slots, esta es transaccional y tiene migración Flyway si cambia esquema.
+- [x] La definición de “comprometida” está aprobada o registrada como bloqueo no implementable.
 - [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
@@ -57,11 +57,12 @@ Dado un bloque pasado o de otro profesional, cuando se intenta mutar, entonces s
 | CA-01 | Cumplido | AvailabilityBlockTest.hu017_ca01_ownFutureBlockWithoutAppointmentsCanBeEditedAndDeleted | Verificado el 2026-10-02 |
 | CA-02 | Cumplido | AvailabilityBlockTest.hu017_ca02_committedBlockIsProtected | Verificado el 2026-10-02 |
 | CA-03 | Cumplido | AvailabilityBlockTest.hu017_ca03_anotherProfessionalsBlockCannotBeMutated y hu017_ca03_pastBlockCannotBeMutated | Verificado el 2026-10-02 |
-| DoD | Parcial: CA verificados; falta UI de edicion de bloques | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
+| DoD | Cumplida: modificar y eliminar desde el portal del profesional, con los mensajes del backend | Suite de 88 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
 - 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
+- 2026-10-02 — UI conectada al backend; DoD completada y HU pasa a `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: estados/retenciones que hacen un bloque “comprometido”.
