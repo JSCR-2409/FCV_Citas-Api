@@ -31,6 +31,16 @@ public class User {
   public String getEmail() { return email; }
   public String getPasswordHash() { return passwordHash; }
   public void changePassword(String encodedPassword) { this.passwordHash = encodedPassword; }
+  /**
+   * HU-007. Solo estos tres campos son editables por su titular. Documento, email, estado y roles
+   * quedan fuera a proposito: el documento y el email identifican la cuenta y son clave de unicidad
+   * y de inicio de sesion, y el estado y los roles son decisiones administrativas.
+   */
+  public void updateContactDetails(String names, String surnames, String phone) {
+    if (names != null) this.names = names;
+    if (surnames != null) this.surnames = surnames;
+    if (phone != null) this.phone = phone;
+  }
   public boolean isActive() { return active; }
   public void addRole(Role role) { roles.add(role); }
   /** Rol de presentacion por defecto. El orden alfabetico deja ADMIN < PROFESSIONAL < USER. */

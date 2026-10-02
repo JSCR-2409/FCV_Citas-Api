@@ -10,3 +10,6 @@ app.jwt.access-secret: test-access-secret-that-is-at-least-32-chars
 app.jwt.refresh-secret: test-refresh-secret-that-is-at-least-32-chars
 app.jwt.access-minutes: 15
 app.jwt.refresh-days: 7
+# HU-006. Las pruebas necesitan el token para verificar el consumo de un solo uso y el rechazo del
+# token vencido; es el mismo canal controlado que usa el entorno de laboratorio.
+app.recovery.expose-token: true

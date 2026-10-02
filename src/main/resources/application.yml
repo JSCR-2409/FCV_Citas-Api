@@ -26,3 +26,8 @@ app:
     access-minutes: ${JWT_ACCESS_MINUTES:15}
     refresh-days: ${JWT_REFRESH_DAYS:7}
   frontend-origin: ${FRONTEND_ORIGIN:http://localhost:4200}
+  recovery:
+    # HU-006. RF-03 admite exponer el token de recuperacion por un canal controlado en desarrollo
+    # porque el envio real de correo es opcional. El valor por defecto es false: si esta propiedad
+    # llegara a un entorno real sin configurar, el token no se devuelve en la respuesta.
+    expose-token: ${RECOVERY_EXPOSE_TOKEN:false}

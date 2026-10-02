@@ -23,7 +23,9 @@ public class RescheduleRequestAdminController {
 
   private final JdbcTemplate db;
 
-  public RescheduleRequestAdminController(JdbcTemplate db) { this.db = db; }
+  private final AppointmentStatusLog history;
+
+  public RescheduleRequestAdminController(JdbcTemplate db, AppointmentStatusLog history) { this.db = db; this.history = history; }
 
   @GetMapping
   ResponseEntity<?> list(@RequestParam(required = false) Long locationId,
@@ -138,6 +140,15 @@ public class RescheduleRequestAdminController {
         + "(SELECT id FROM reschedule_request_statuses WHERE code=?),"
         + "decision_reason=?,decided_by_user_id=?,decided_at=? WHERE id=?",
         d.status(), d.reason(), Long.parseLong(auth.getName()), LocalDateTime.now(), id);
+
+    // HU-031: aprobar una reprogramacion no cambia el estado de la cita, pero si su horario, y eso
+    // es un hecho auditable. Se registra como APPROVED con el motivo para que el historial explique
+    // por que la cita cambio de hora; un rechazo no altera la cita y no genera entrada.
+    if (approved) {
+      history.record(appointmentId, "APPROVED", Long.parseLong(auth.getName()),
+          AppointmentStatusLog.SOURCE_ADMIN,
+          "Reprogramación aprobada: " + previousStart + " → " + requestedStart);
+    }
 
     return ResponseEntity.ok(Map.of("id", id, "appointmentId", appointmentId, "status", d.status(),
         "reason", d.reason() == null ? "" : d.reason()));
