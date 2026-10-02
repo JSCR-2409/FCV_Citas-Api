@@ -2,7 +2,7 @@
 id: HU-018
 tipo: historia-de-usuario
 titulo: "Consultar calendario profesional"
-estado: Pendiente de aprobación
+estado: En validación
 epica: "[[EP-004-disponibilidad-y-busqueda-de-horarios]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento III — Oferta de agenda"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-017-modificar-bloques-futuros]]"]
 **Nivel:** Medio. Requiere proyección autorizada, filtros y estado de UI.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Definir lectura y filtros de calendario.** Dificultad: Medio. No asumir paginación/periodo sin contrato.
-- [ ] **T-02 — Implementar consulta con ownership.** Dificultad: Medio. Excluir información no autorizada.
-- [ ] **T-03 — Integrar calendario y estados loading/empty/error.** Dificultad: Medio. Validar navegación/diseño aprobado.
+- [x] **T-01 — Definir lectura y filtros de calendario.** Dificultad: Medio. No asumir paginación/periodo sin contrato.
+- [x] **T-02 — Implementar consulta con ownership.** Dificultad: Medio. Excluir información no autorizada.
+- [x] **T-03 — Integrar calendario y estados loading/empty/error.** Dificultad: Medio. Validar navegación/diseño aprobado.
 
 ## Criterios de aceptación
 ### CA-01 — Vista propia
@@ -49,18 +49,19 @@ Dado un PROFESSIONAL sin bloques en el criterio consultado, cuando abre calendar
 - [ ] CA-01 a CA-03 tienen pruebas de ownership, REST y UI aplicable.
 - [ ] El contrato delimita filtros/atributos y la vista no muestra tokens ni datos de USER.
 - [ ] Accesibilidad/estados de carga, vacío y error se verifican frente al diseño aprobado cuando exista.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | AvailabilityBlockTest.hu018_ca01_calendarShowsOwnBlocksWithDateTimeAndSite | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | AvailabilityBlockTest.hu018_ca02_calendarNeverExposesAnotherProfessionalsBlocks | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | AvailabilityBlockTest.hu018_ca03_emptyRangeReturnsAnEmptyStateWithoutInventingAvailability | Verificado el 2026-10-02 |
+| DoD | Parcial: CA verificados; el portal profesional sigue mostrando datos simulados | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: período por defecto, paginación y representación de bloques reservados.

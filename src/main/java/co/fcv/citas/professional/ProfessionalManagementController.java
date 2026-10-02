@@ -2,7 +2,6 @@ package co.fcv.citas.professional;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import java.sql.Statement;
 import java.util.*;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.*;
@@ -23,9 +22,9 @@ public class ProfessionalManagementController {
     try {
       if (db.queryForObject("SELECT COUNT(*) FROM users WHERE email=? OR (document_type=? AND document_number=?)",Integer.class,r.email().trim().toLowerCase(),r.documentType().trim(),r.documentNumber().trim())>0) return conflict("usuario ya registrado");
       if (db.queryForObject("SELECT COUNT(*) FROM professionals WHERE professional_code=? OR license_number=?",Integer.class,r.professionalCode(),r.licenseNumber())>0) return conflict("profesional ya registrado");
-      var key=new GeneratedKeyHolder(); db.update(c->{var p=c.prepareStatement("INSERT INTO users(first_name,last_name,document_type,document_number,email,phone,password_hash,active,created_at) VALUES(?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",Statement.RETURN_GENERATED_KEYS); p.setString(1,r.names());p.setString(2,r.surnames());p.setString(3,r.documentType());p.setString(4,r.documentNumber());p.setString(5,r.email().trim().toLowerCase());p.setString(6,r.phone());p.setString(7,encoder.encode(r.temporaryPassword()));p.setBoolean(8,true);return p;},key);
+      var key=new GeneratedKeyHolder(); db.update(c->{var p=c.prepareStatement("INSERT INTO users(first_name,last_name,document_type,document_number,email,phone,password_hash,active,created_at) VALUES(?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",new String[]{"id"}); p.setString(1,r.names());p.setString(2,r.surnames());p.setString(3,r.documentType());p.setString(4,r.documentNumber());p.setString(5,r.email().trim().toLowerCase());p.setString(6,r.phone());p.setString(7,encoder.encode(r.temporaryPassword()));p.setBoolean(8,true);return p;},key);
       long userId=key.getKey().longValue(); db.update("INSERT INTO user_roles(user_id,role_id) SELECT ?,id FROM roles WHERE code='PROFESSIONAL'",userId);
-      var professionalKey=new GeneratedKeyHolder(); db.update(c->{var p=c.prepareStatement("INSERT INTO professionals(user_id,professional_code,license_number,active) VALUES(?,?,?,TRUE)",Statement.RETURN_GENERATED_KEYS);p.setLong(1,userId);p.setString(2,r.professionalCode());p.setString(3,r.licenseNumber());return p;},professionalKey);
+      var professionalKey=new GeneratedKeyHolder(); db.update(c->{var p=c.prepareStatement("INSERT INTO professionals(user_id,professional_code,license_number,active) VALUES(?,?,?,TRUE)",new String[]{"id"});p.setLong(1,userId);p.setString(2,r.professionalCode());p.setString(3,r.licenseNumber());return p;},professionalKey);
       return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id",professionalKey.getKey().longValue(),"professionalCode",r.professionalCode(),"licenseNumber",r.licenseNumber(),"email",r.email().trim().toLowerCase(),"active",true));
     } catch (DuplicateKeyException e) { return conflict("registro duplicado"); }
   }

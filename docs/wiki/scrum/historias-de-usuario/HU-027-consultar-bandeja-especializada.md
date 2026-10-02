@@ -2,7 +2,7 @@
 id: HU-027
 tipo: historia-de-usuario
 titulo: "Consultar bandeja especializada"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-007-operacion-administrativa-y-auditoria]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento V — Operación clínica simulada"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-028-resolver-solicitud-especializada]]"]
 **Nivel:** Medio. Es una proyección ADMIN con filtros y exclusión correcta de estados.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Definir consulta/filtros y atributos de bandeja.** Dificultad: Medio. Acordar orden/paginación si aplica.
-- [ ] **T-02 — Implementar lectura protegida por rol y estado REQUESTED.** Dificultad: Medio. Optimizar por filtros relevantes.
-- [ ] **T-03 — Integrar dashboard y pruebas de cola vacía/filtros.** Dificultad: Medio. Mostrar datos sin secretos.
+- [x] **T-01 — Definir consulta/filtros y atributos de bandeja.** Dificultad: Medio. Acordar orden/paginación si aplica.
+- [x] **T-02 — Implementar lectura protegida por rol y estado REQUESTED.** Dificultad: Medio. Optimizar por filtros relevantes.
+- [x] **T-03 — Integrar dashboard y pruebas de cola vacía/filtros.** Dificultad: Medio. Mostrar datos sin secretos.
 
 ## Criterios de aceptación
 ### CA-01 — Solo solicitudes pendientes
@@ -46,21 +46,22 @@ Dado solicitudes con atributos distintos, cuando filtra por sede, profesional, e
 Dado USER o PROFESSIONAL, cuando intenta consultar la bandeja ADMIN, entonces backend lo rechaza.
 
 ## Definition of Done
-- [ ] CA-01 a CA-03 tienen pruebas de estado, filtros, RBAC y UI aplicable.
-- [ ] El contrato limita los atributos a la decisión y define vacío/error/paginación cuando se apruebe.
-- [ ] La consulta cuenta con índices/migración Flyway si el esquema/consulta lo requiere.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] CA-01 a CA-03 tienen pruebas de estado, filtros, RBAC y UI aplicable.
+- [x] El contrato limita los atributos a la decisión y define vacío/error/paginación cuando se apruebe.
+- [x] La consulta cuenta con índices/migración Flyway si el esquema/consulta lo requiere.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | SpecializedRequestDecisionTest.hu027_ca01_trayListsOnlyPendingRequests | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | SpecializedRequestDecisionTest.hu027_ca02_trayAppliesFilters; filtros locationId, professionalId, specialtyId y date | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | SpecializedRequestDecisionTest.hu027_ca03_patientCannotReadTheAdminTray | Verificado el 2026-10-02 |
+| DoD | Cumplida: pruebas REST, contrato 1.1 y bandeja real en el portal administrativo | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: orden de atención y paginación de la bandeja.

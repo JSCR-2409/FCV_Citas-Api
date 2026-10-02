@@ -1,10 +1,10 @@
-# citas-api — Instrucciones del agente backend
+# FCV_Citas-Api — Instrucciones del agente backend
 
 ## Alcance del repositorio
 
 Este repositorio implementa exclusivamente el backend del laboratorio: Java 21, Spring Boot 3.5.x, Maven, REST/JSON, Spring Security con JWT access/refresh, Spring Data JPA, MySQL 8.4 y Flyway.
 
-No modificar `citas-web/`, no crear Express/BFF y no acoplar el backend a React o Angular. El frontend consumirá esta API directamente por REST.
+No modificar `FCV_Citas-Web/`, no crear Express/BFF y no acoplar el backend a React o Angular. El frontend consumirá esta API directamente por REST.
 
 El checkout inicial no define todavía paquetes, módulos Maven, código Java, migraciones ni pruebas. No inventar una estructura de paquetes sin volver a inspeccionar el proyecto una vez inicializado.
 
@@ -46,7 +46,7 @@ Si no existe una HU o DoD aplicable, como ocurre en el estado inicial del reposi
 ## Contratos y pruebas
 
 - La API es REST/JSON y su contrato debe documentarse antes o junto con su implementación; no inferir endpoints o DTOs sin fuente aprobada.
-- Si cambia un contrato REST, comunicar el impacto al orquestador y exigir evidencia de compatibilidad en `citas-api` y `citas-web`.
+- Si cambia un contrato REST, comunicar el impacto al orquestador y exigir evidencia de compatibilidad en `FCV_Citas-Api` y `FCV_Citas-Web`.
 - Ejecutar pruebas de dominio, aplicación e integración REST/persistencia que correspondan a la HU.
 - Antes de cerrar una tarea, verificar reglas del PRD, arquitectura, migraciones, controles de acceso y DoD; indicar explícitamente lo no verificado.
 

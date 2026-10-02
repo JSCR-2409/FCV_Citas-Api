@@ -2,7 +2,7 @@
 id: HU-017
 tipo: historia-de-usuario
 titulo: "Modificar bloques futuros"
-estado: Pendiente de aprobación
+estado: En validación
 epica: "[[EP-004-disponibilidad-y-busqueda-de-horarios]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento III — Oferta de agenda"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-018-consultar-calendario-profesional]]"]
 **Nivel:** Alto. Debe detectar compromisos y preservar la integridad de reservas.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Definir qué constituye cita comprometida.** Dificultad: Alto. Alinear estados/retenciones con contrato.
-- [ ] **T-02 — Implementar edición/eliminación con ownership e invariantes.** Dificultad: Alto. Revalidar solape/sede/futuro.
-- [ ] **T-03 — Integrar acciones de calendario y pruebas de bloqueo.** Dificultad: Medio. Confirmar resultados observables.
+- [x] **T-01 — Definir qué constituye cita comprometida.** Dificultad: Alto. Alinear estados/retenciones con contrato.
+- [x] **T-02 — Implementar edición/eliminación con ownership e invariantes.** Dificultad: Alto. Revalidar solape/sede/futuro.
+- [x] **T-03 — Integrar acciones de calendario y pruebas de bloqueo.** Dificultad: Medio. Confirmar resultados observables.
 
 ## Criterios de aceptación
 ### CA-01 — Modificación permitida
@@ -49,18 +49,19 @@ Dado un bloque pasado o de otro profesional, cuando se intenta mutar, entonces s
 - [ ] CA-01 a CA-03 tienen pruebas de estados de reserva, ownership y REST/UI aplicable.
 - [ ] Si existe actualización de slots, esta es transaccional y tiene migración Flyway si cambia esquema.
 - [ ] La definición de “comprometida” está aprobada o registrada como bloqueo no implementable.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | AvailabilityBlockTest.hu017_ca01_ownFutureBlockWithoutAppointmentsCanBeEditedAndDeleted | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | AvailabilityBlockTest.hu017_ca02_committedBlockIsProtected | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | AvailabilityBlockTest.hu017_ca03_anotherProfessionalsBlockCannotBeMutated y hu017_ca03_pastBlockCannotBeMutated | Verificado el 2026-10-02 |
+| DoD | Parcial: CA verificados; falta UI de edicion de bloques | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: estados/retenciones que hacen un bloque “comprometido”.

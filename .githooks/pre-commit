@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Puerta de calidad local de citas-api. Se activa con:
+#   git config core.hooksPath .githooks
+#
+# Bloquea el commit si:
+#   1. el contenido preparado contiene credenciales o patrones de secreto;
+#   2. la suite de pruebas no pasa.
+#
+# Las pruebas se ejecutan dentro del contenedor fcv-citas-api-dev cuando esta disponible,
+# porque el host del laboratorio no tiene Maven ni JDK 21. Si no hay forma de ejecutarlas,
+# el hook bloquea en lugar de dar por bueno lo que no pudo verificar.
+
+set -uo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT" || exit 1
+
+echo "== Verificacion previa al commit (citas-api) =="
+
+echo "-- 1/2 Buscando credenciales en el contenido preparado"
+if ! bash .githooks/secret-scan.sh --staged; then
+  echo ""
+  echo "COMMIT BLOQUEADO: se detectaron posibles secretos."
+  exit 1
+fi
+echo "   OK: sin credenciales detectadas."
+
+echo "-- 2/2 Ejecutando pruebas del backend"
+CONTAINER="fcv-citas-api-dev"
+if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "$CONTAINER"; then
+  echo "   Usando el contenedor $CONTAINER"
+  if ! docker exec -i "$CONTAINER" mvn -B -q test; then
+    echo ""
+    echo "COMMIT BLOQUEADO: hay pruebas en rojo."
+    exit 1
+  fi
+elif command -v mvn >/dev/null 2>&1; then
+  echo "   Usando el Maven del host"
+  if ! mvn -B -q test; then
+    echo ""
+    echo "COMMIT BLOQUEADO: hay pruebas en rojo."
+    exit 1
+  fi
+else
+  echo ""
+  echo "COMMIT BLOQUEADO: no se pudieron ejecutar las pruebas."
+  echo "  Levante el entorno con  docker compose up -d  desde la raiz del workspace,"
+  echo "  o instale Maven y un JDK 21 en el host."
+  exit 1
+fi
+echo "   OK: pruebas en verde."
+
+echo "== Verificacion superada =="
+exit 0

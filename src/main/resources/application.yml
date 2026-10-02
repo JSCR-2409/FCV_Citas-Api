@@ -9,11 +9,20 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+    # El esquema lo crea database/reference/db.sql via init script de MySQL, por lo
+    # que Flyway encuentra un esquema no vacio y hace baseline en V1. Consecuencia:
+    # V1 se marca como baseline y no se ejecuta, y V3-V6 son no-ops porque usan
+    # CREATE TABLE IF NOT EXISTS sobre tablas que la referencia ya creo. Solo V2
+    # aplica realmente, creando refresh_sessions (ausente en la referencia).
+    # Las migraciones NO son la fuente de verdad del esquema vigente.
     baseline-on-migrate: true
+    baseline-version: 1
 app:
   jwt:
-    access-secret: ${JWT_ACCESS_SECRET:development-access-secret-change-me-32}
-    refresh-secret: ${JWT_REFRESH_SECRET:development-refresh-secret-change-me-32}
+    # Sin valor por defecto a proposito: un secreto por defecto versionado es un secreto
+    # conocido. Si la variable no esta definida, la aplicacion falla al arrancar.
+    access-secret: ${JWT_ACCESS_SECRET}
+    refresh-secret: ${JWT_REFRESH_SECRET}
     access-minutes: ${JWT_ACCESS_MINUTES:15}
     refresh-days: ${JWT_REFRESH_DAYS:7}
   frontend-origin: ${FRONTEND_ORIGIN:http://localhost:4200}

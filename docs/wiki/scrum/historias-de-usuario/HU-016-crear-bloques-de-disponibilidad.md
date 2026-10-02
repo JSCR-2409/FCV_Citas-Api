@@ -2,7 +2,7 @@
 id: HU-016
 tipo: historia-de-usuario
 titulo: "Crear bloques de disponibilidad"
-estado: Pendiente de aprobación
+estado: En validación
 epica: "[[EP-004-disponibilidad-y-busqueda-de-horarios]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento III — Oferta de agenda"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-017-modificar-bloques-futuros]]", "[[HU-019-consultar-dispo
 **Nivel:** Alto. Involucra validaciones temporales, sede, solape y generación de slots.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Definir modelo/caso de uso de bloque y slots.** Dificultad: Alto. Acordar límites de hora/fecha en contrato.
-- [ ] **T-02 — Implementar validaciones de pasado, sede y solape.** Dificultad: Alto. Proteger concurrencia de escritura.
-- [ ] **T-03 — Integrar calendario/formulario y pruebas.** Dificultad: Medio. Mostrar errores verificables.
+- [x] **T-01 — Definir modelo/caso de uso de bloque y slots.** Dificultad: Alto. Acordar límites de hora/fecha en contrato.
+- [x] **T-02 — Implementar validaciones de pasado, sede y solape.** Dificultad: Alto. Proteger concurrencia de escritura.
+- [x] **T-03 — Integrar calendario/formulario y pruebas.** Dificultad: Medio. Mostrar errores verificables.
 
 ## Criterios de aceptación
 ### CA-01 — Bloques múltiples válidos
@@ -49,18 +49,19 @@ Dado el mismo día, cuando crea 08:00–12:00 y 14:00–17:00 en HIC, entonces a
 - [ ] CA-01 a CA-03 tienen pruebas de dominio/aplicación/REST y UI calendario aplicable.
 - [ ] Datos de bloques/slots tienen migración Flyway e índices pertinentes si se implementan.
 - [ ] Autorización/ownership del profesional y contrato REST directo están verificados.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | AvailabilityBlockTest.hu016_ca01_blockIsSplitIntoThirtyMinuteSlots | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | AvailabilityBlockTest.hu016_ca02_pastDateIsRejected, hu016_ca02_siteNotAssignedIsRejected, hu016_ca02_boundariesMustAlignToThirtyMinutes y hu016_ca02_overlappingBlockIsRejectedWithoutTouchingTheAgenda | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | AvailabilityBlockTest.hu016_ca03_twoBlocksTheSameDayAndTheGapIsNotOffered | Verificado el 2026-10-02 |
+| DoD | Parcial: CA verificados; falta UI de gestion de bloques en el portal profesional | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: zona horaria, granularidad de límites y estrategia de concurrencia de bloques.

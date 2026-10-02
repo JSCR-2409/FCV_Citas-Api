@@ -2,7 +2,7 @@
 id: HU-012
 tipo: historia-de-usuario
 titulo: "Administrar especialidades"
-estado: Pendiente de aprobación
+estado: En validación
 epica: "[[EP-003-catalogos-y-gestion-de-profesionales]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-014-asignar-especialidades-profesional]]", "[[HU-019-consul
 **Nivel:** Alto. Su duración condiciona slots, reservas y disponibilidad posterior.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Modelar reglas de duración/estado y referencias.** Dificultad: Alto. Incluir Medicina General si la decisión de catálogo lo define.
-- [ ] **T-02 — Implementar administración y persistencia normalizada.** Dificultad: Medio. Aplicar Flyway si cambia esquema.
-- [ ] **T-03 — Integrar UI ADMIN y pruebas de duración/rol/referencia.** Dificultad: Medio. Exponer solo opciones autorizadas.
+- [x] **T-01 — Modelar reglas de duración/estado y referencias.** Dificultad: Alto. Incluir Medicina General si la decisión de catálogo lo define.
+- [x] **T-02 — Implementar administración y persistencia normalizada.** Dificultad: Medio. Aplicar Flyway si cambia esquema.
+- [x] **T-03 — Integrar UI ADMIN y pruebas de duración/rol/referencia.** Dificultad: Medio. Exponer solo opciones autorizadas.
 
 ## Criterios de aceptación
 ### CA-01 — Duración restringida
@@ -49,18 +49,19 @@ Dado un PROFESSIONAL asociado, cuando publica/recibe disponibilidad, entonces no
 - [ ] CA-01 a CA-03 tienen pruebas de dominio, RBAC, persistencia y UI aplicable.
 - [ ] Cualquier esquema nuevo posee migración Flyway y relación 3FN.
 - [ ] El contrato es consumible por asignación/disponibilidad sin duplicar la especialidad.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | CatalogAndAuthorizationTest.hu012_ca01_specialtyDurationIsRestrictedToThirtyOrSixty | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | No existe operacion de borrado; PATCH /api/v1/admin/specialties/{id} desactiva sin perder referencias | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | La duracion la resuelven /availability y la reserva desde specialties; el profesional no tiene endpoint para alterarla | Verificado el 2026-10-02 |
+| DoD | Parcial: CA verificados; falta UI de administracion de especialidades | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: si “Medicina General” se precarga como especialidad y su política de activación.

@@ -2,7 +2,7 @@
 id: HU-009
 tipo: historia-de-usuario
 titulo: "Consultar catálogos fijos"
-estado: Pendiente de aprobación
+estado: En validación
 epica: "[[EP-003-catalogos-y-gestion-de-profesionales]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-010-administrar-eps]]"]
 **Nivel:** Medio. Requiere datos seed coherentes y contrato reusable por varias HU.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Definir catálogo y seed autorizado.** Dificultad: Medio. Mantener IDs/nombres coherentes con PRD.
-- [ ] **T-02 — Implementar lectura REST con autorización necesaria.** Dificultad: Medio. No exponer mutaciones.
-- [ ] **T-03 — Integrar consumo UI y pruebas de inmutabilidad.** Dificultad: Bajo. Ajustar al framework decidido.
+- [x] **T-01 — Definir catálogo y seed autorizado.** Dificultad: Medio. Mantener IDs/nombres coherentes con PRD.
+- [x] **T-02 — Implementar lectura REST con autorización necesaria.** Dificultad: Medio. No exponer mutaciones.
+- [x] **T-03 — Integrar consumo UI y pruebas de inmutabilidad.** Dificultad: Bajo. Ajustar al framework decidido.
 
 ## Criterios de aceptación
 ### CA-01 — Catálogos disponibles
@@ -49,18 +49,19 @@ Dado el contenido de catálogos, cuando se revisa, entonces no incorpora datos s
 - [ ] CA-01 a CA-03 tienen pruebas de seed/REST/UI aplicable.
 - [ ] Si el esquema/seed se introduce, hay migración Flyway reproducible.
 - [ ] El contrato describe valores y acceso de solo lectura sin contradicción con PRD.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | CatalogAndAuthorizationTest.ca01_fixedCatalogsAreAvailable, ca01_locationsReturnTheTwoFixedSites y ca01_appointmentStatusesCoverTheWholeLifecycle | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | CatalogAndAuthorizationTest.ca02_catalogsAreNotWritable | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | Seed de V3/V4: solo HIC e ICV, informacion publica; sin datos de personas reales | Verificado el 2026-10-02 |
+| DoD | Parcial: CA verificados; falta pantalla propia de consulta de catalogos | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
 
 ## Notas y decisiones
 - La forma de localizar los catálogos por API se define en [[HU-002-documentar-contrato-rest-inicial]].

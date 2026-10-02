@@ -2,7 +2,7 @@
 id: HU-015
 tipo: historia-de-usuario
 titulo: "Asignar sedes y estado al profesional"
-estado: Pendiente de aprobación
+estado: En validación
 epica: "[[EP-003-catalogos-y-gestion-de-profesionales]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-016-crear-bloques-de-disponibilidad]]"]
 **Nivel:** Medio. Afecta habilitación, disponibilidad y citas futuras.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Modelar relación profesional–sede y estado.** Dificultad: Medio. Usar catálogo fijo.
-- [ ] **T-02 — Implementar administración RBAC y reglas de habilitación.** Dificultad: Medio. Incluir migración si aplica.
-- [ ] **T-03 — Integrar UI y pruebas de sede no asignada/inactivo.** Dificultad: Medio. Alinear efectos con contrato.
+- [x] **T-01 — Modelar relación profesional–sede y estado.** Dificultad: Medio. Usar catálogo fijo.
+- [x] **T-02 — Implementar administración RBAC y reglas de habilitación.** Dificultad: Medio. Incluir migración si aplica.
+- [x] **T-03 — Integrar UI y pruebas de sede no asignada/inactivo.** Dificultad: Medio. Alinear efectos con contrato.
 
 ## Criterios de aceptación
 ### CA-01 — Sedes permitidas
@@ -49,18 +49,19 @@ Dado un profesional desactivado, cuando intenta operar una capacidad restringida
 - [ ] CA-01 a CA-03 tienen pruebas de asociación, RBAC y uso por disponibilidad.
 - [ ] El estado/relación conserva 3FN y Flyway cuando se modifica esquema.
 - [ ] Los efectos de desactivar con citas/bloques existentes están documentados o bloqueados como decisión pendiente.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ProfessionalManagementTest.hu015_ca01_assignsBothFixedSites | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | AvailabilityBlockTest.hu016_ca02_siteNotAssignedIsRejected | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | ProfessionalManagementTest.hu015_ca03_deactivatedProfessionalIsNotOfferedNorCanPublish | Verificado el 2026-10-02 |
+| DoD | Parcial: CA verificados; falta UI de sedes y estado operativo | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: efecto de la desactivación sobre bloques y citas existentes/futuras.

@@ -2,7 +2,7 @@
 id: HU-013
 tipo: historia-de-usuario
 titulo: "Crear profesional"
-estado: Pendiente de aprobación
+estado: En validación
 epica: "[[EP-003-catalogos-y-gestion-de-profesionales]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-014-asignar-especialidades-profesional]]", "[[HU-015-asigna
 **Nivel:** Alto. Combina identidad, rol especializado, seguridad y datos únicos.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Definir atributos y reglas de unicidad del profesional.** Dificultad: Medio. No asumir formato de matrícula.
-- [ ] **T-02 — Implementar creación ADMIN y persistencia especializada.** Dificultad: Alto. Incluir migración necesaria.
-- [ ] **T-03 — Integrar formulario y pruebas de RBAC/datos sintéticos.** Dificultad: Medio. No exponer secretos iniciales.
+- [x] **T-01 — Definir atributos y reglas de unicidad del profesional.** Dificultad: Medio. No asumir formato de matrícula.
+- [x] **T-02 — Implementar creación ADMIN y persistencia especializada.** Dificultad: Alto. Incluir migración necesaria.
+- [x] **T-03 — Integrar formulario y pruebas de RBAC/datos sintéticos.** Dificultad: Medio. No exponer secretos iniciales.
 
 ## Criterios de aceptación
 ### CA-01 — Creación restringida
@@ -49,18 +49,19 @@ Dado el profesional creado, cuando se revisan sus datos, entonces son sintético
 - [ ] CA-01 a CA-03 tienen pruebas RBAC, unicidad y REST/UI aplicable.
 - [ ] El diseño modela al profesional como usuario especializado en 3FN y tiene Flyway si aplica.
 - [ ] El contrato no expone credenciales ni obliga a una asignación no aprobada.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ProfessionalManagementTest.hu013_ca01_adminCreatesProfessionalWithItsRole | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | ProfessionalManagementTest.hu013_ca02_onlyAdminCanCreateProfessionals y hu013_ca02_duplicatedIdentifiersAreRejected | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | ProfessionalManagementTest.hu013_ca01_passwordIsNeverReturnedNorStoredInClear; datos sinteticos @test.local | Verificado el 2026-10-02 |
+| DoD | Parcial: CA verificados; falta UI de creacion de profesionales | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: formato/unicidad precisa de código profesional y matrícula.

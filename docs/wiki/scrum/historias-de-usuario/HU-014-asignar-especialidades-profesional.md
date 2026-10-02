@@ -2,7 +2,7 @@
 id: HU-014
 tipo: historia-de-usuario
 titulo: "Asignar especialidades al profesional"
-estado: Pendiente de aprobación
+estado: En validación
 epica: "[[EP-003-catalogos-y-gestion-de-profesionales]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-019-consultar-disponibilidad]]"]
 **Nivel:** Medio. Es una relación N:M con invariantes de estado y primaria.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Modelar relación y unicidad de primaria.** Dificultad: Medio. Evitar listas en columnas.
-- [ ] **T-02 — Implementar caso de uso ADMIN y validación de activo.** Dificultad: Medio. Añadir Flyway si corresponde.
-- [ ] **T-03 — Integrar gestión UI y pruebas de combinaciones.** Dificultad: Medio. No permitir duración editable.
+- [x] **T-01 — Modelar relación y unicidad de primaria.** Dificultad: Medio. Evitar listas en columnas.
+- [x] **T-02 — Implementar caso de uso ADMIN y validación de activo.** Dificultad: Medio. Añadir Flyway si corresponde.
+- [x] **T-03 — Integrar gestión UI y pruebas de combinaciones.** Dificultad: Medio. No permitir duración editable.
 
 ## Criterios de aceptación
 ### CA-01 — Múltiples asociaciones
@@ -49,18 +49,19 @@ Dado una especialidad no activa o no asociada, cuando se intenta publicar/reserv
 - [ ] CA-01 a CA-03 tienen pruebas de dominio/persistencia/RBAC y UI aplicable.
 - [ ] La tabla puente y regla de primaria mantienen 3FN y tienen Flyway si cambian esquema.
 - [ ] Disponibilidad/contrato consumen la asociación sin copiar datos de especialidad.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ProfessionalManagementTest.hu014_ca01_assignsSeveralSpecialtiesWithoutDuplicates | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | ProfessionalManagementTest.hu014_ca02_exactlyOnePrimarySpecialtyIsRequired | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | ProfessionalManagementTest.hu014_ca03_inactiveOrUnknownSpecialtyIsNotEligible y AvailabilityRulesTest.ca03_excludesSpecialtyNotAssociatedToProfessional | Verificado el 2026-10-02 |
+| DoD | Parcial: CA verificados; falta UI de asignacion de especialidades | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `En validación`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: comportamiento si se intenta desactivar una especialidad usada por citas futuras.

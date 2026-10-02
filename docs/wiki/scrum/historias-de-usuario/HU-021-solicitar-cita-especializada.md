@@ -2,7 +2,7 @@
 id: HU-021
 tipo: historia-de-usuario
 titulo: "Solicitar cita especializada"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-005-ciclo-de-citas-del-usuario]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento IV — Reserva del usuario"
@@ -33,9 +33,9 @@ relacionadas: ["[[HU-027-consultar-bandeja-especializada]]", "[[HU-028-resolver-
 **Nivel:** Alto. Integra elegibilidad, retención, transacción, cola administrativa y auditoría.
 
 ## Tareas de desarrollo
-- [ ] **T-01 — Definir solicitud REQUESTED y modelo de retención.** Dificultad: Alto. Registrar expiración pendiente.
-- [ ] **T-02 — Implementar creación atómica con exclusión de slots.** Dificultad: Alto. Validar todas las asociaciones.
-- [ ] **T-03 — Integrar confirmación USER y pruebas de cola ADMIN.** Dificultad: Alto. Informar conflicto sin datos sensibles.
+- [x] **T-01 — Definir solicitud REQUESTED y modelo de retención.** Dificultad: Alto. Registrar expiración pendiente.
+- [x] **T-02 — Implementar creación atómica con exclusión de slots.** Dificultad: Alto. Validar todas las asociaciones.
+- [x] **T-03 — Integrar confirmación USER y pruebas de cola ADMIN.** Dificultad: Alto. Informar conflicto sin datos sensibles.
 
 ## Criterios de aceptación
 ### CA-01 — Solicitud retenida
@@ -46,21 +46,22 @@ Dado un slot ya reservado o retenido, cuando otro USER intenta solicitarlo, ento
 Dado una solicitud creada, cuando ADMIN consulta su bandeja, entonces dispone de sede, profesional, especialidad, fecha/hora y duración para decidir.
 
 ## Definition of Done
-- [ ] CA-01 a CA-03 tienen pruebas de concurrencia, duración 30/60, persistencia/REST y UI aplicable.
-- [ ] Retenciones y solicitud tienen Flyway/índices transaccionales cuando se agregan.
-- [ ] El contrato describe respuesta a conflicto y la evidencia cross-repo confirma su consumo.
-- [ ] La trazabilidad Scrum está actualizada.
+- [x] CA-01 a CA-03 tienen pruebas de concurrencia, duración 30/60, persistencia/REST y UI aplicable.
+- [x] Retenciones y solicitud tienen Flyway/índices transaccionales cuando se agregan.
+- [x] El contrato describe respuesta a conflicto y la evidencia cross-repo confirma su consumo.
+- [x] La trazabilidad Scrum está actualizada.
 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | AppointmentBookingRulesTest.hu021_ca01_specializedIsRequestedAndHoldsTheSlot y hu021_ca01_specializedEndpointRejectsAGeneralSpecialty | Verificado el 2026-10-02 |
+| CA-02 | Cumplido | AppointmentBookingRulesTest.hu021_ca02_requestOnAHeldSlotIsRejected | Verificado el 2026-10-02 |
+| CA-03 | Cumplido | SpecializedRequestDecisionTest.hu021_ca03_trayCarriesTheDataNeededToDecide; la bandeja entrega sede, profesional, especialidad, franja y duracion | Verificado el 2026-10-02 |
+| DoD | Cumplida: pruebas REST, contrato 1.1 y UI de solicitud en el portal del paciente | Suite de 59 pruebas de backend en verde | Revisado el 2026-10-02 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — Implementacion verificada contra la suite de pruebas y el entorno MySQL; HU pasa a `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: caducidad/limpieza de una solicitud REQUESTED no resuelta.
