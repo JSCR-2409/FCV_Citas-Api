@@ -104,6 +104,42 @@ class CatalogAndAuthorizationTest {
     mvc.perform(get("/api/v1/availability?date=2030-01-01&specialtyId=1")).andExpect(status().isForbidden());
   }
 
+  /**
+   * user_roles es N:M y el PRD admite usuarios con varios roles: el token debe llevarlos todos
+   * y conceder una autoridad por cada uno, no solo la del rol alfabeticamente primero.
+   */
+  @Test
+  void aUserWithSeveralRolesGetsAllOfThem() throws Exception {
+    long id = data.registerUser("cat.multi@test.local", "CAT-4");
+    // El flush va primero: el alta via API deja el rol original pendiente en la sesion JPA y,
+    // si se volcara despues, reinsertaria la fila que se acaba de escribir aqui.
+    em.flush();
+    db.update("DELETE FROM user_roles WHERE user_id=?", id);
+    for (String code : new String[] {"USER", "PROFESSIONAL", "ADMIN"}) {
+      db.update("INSERT INTO user_roles(user_id,role_id) SELECT ?,r.id FROM roles r WHERE r.code=?", id, code);
+    }
+    em.clear();
+    String token = "Bearer " + data.login("cat.multi@test.local");
+
+    // Endpoint exclusivo de ADMIN y endpoint de cualquier autenticado, con el mismo token.
+    mvc.perform(get("/api/v1/admin/specialized-requests").header(HttpHeaders.AUTHORIZATION, token))
+        .andExpect(status().isOk());
+    mvc.perform(get("/api/v1/me").header(HttpHeaders.AUTHORIZATION, token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.roles.length()").value(3))
+        .andExpect(jsonPath("$.role").value("ADMIN"));
+  }
+
+  @Test
+  void aUserWithASingleRoleDoesNotGainOthers() throws Exception {
+    mvc.perform(get("/api/v1/admin/specialized-requests").header(HttpHeaders.AUTHORIZATION, patient))
+        .andExpect(status().isForbidden());
+    mvc.perform(get("/api/v1/me").header(HttpHeaders.AUTHORIZATION, patient))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.roles.length()").value(1))
+        .andExpect(jsonPath("$.role").value("USER"));
+  }
+
   @Test
   void hu012_ca01_specialtyDurationIsRestrictedToThirtyOrSixty() throws Exception {
     mvc.perform(post("/api/v1/admin/specialties").header(HttpHeaders.AUTHORIZATION, admin)

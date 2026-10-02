@@ -26,7 +26,10 @@ BEGIN {
   add("xox[baprs]-[0-9A-Za-z-]{10,}", 1, "token de Slack")
   add("eyJ[A-Za-z0-9_-]{10,}\\.eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}", 1, "JWT emitido")
   add("(password|passwd|contrasena|secret|token|api[_-]?key)[ \t]*[:=][ \t]*[\"'"'"'][^\"'"'"']{8,}[\"'"'"']", 0, "credencial embebida")
-  add("(password|passwd|contrasena|secret|credential)[a-z_]*[^\"'"'"' \t]{0,12}[ \t]*\\(?[ \t]*[\"'"'"'][^\"'"'"']{8,}[\"'"'"']", 0, "credencial pasada como argumento")
+  # El contenido entre comillas excluye ; ( ) = para no saltar de una cadena a la siguiente
+  # cuando el codigo esta minificado en una sola linea: eso daba falsos positivos.
+  add("(password|passwd|contrasena|secret|credential)[a-z_]*[^\"'"'"' \t]{0,12}[ \t]*\\(?[ \t]*[\"'"'"'][^\"'"'"';()=]{8,}[\"'"'"']", 0, "credencial pasada como argumento")
+  add("(secret|password|passwd|token|api[_-]?key)[a-z_.-]*[\"'"'"'][ \t]*,[ \t]*[\"'"'"'][^\"'"'"']{12,}[\"'"'"']", 0, "valor por defecto literal junto a una clave sensible")
   add("(" KEYS ")[ \t]*[:=][ \t]*[A-Za-z0-9/+_.-]{8,}", 1, "valor literal en variable sensible")
   add("[$]\\{(" KEYS "):[^}  ]{8,}\\}", 1, "valor por defecto embebido en variable sensible")
 }

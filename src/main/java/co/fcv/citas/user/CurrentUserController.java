@@ -13,7 +13,18 @@ public class CurrentUserController {
 
   @GetMapping
   Map<String,Object> profile(Authentication auth) {
-    return db.queryForMap("SELECT u.id,u.first_name names,u.last_name surnames,u.document_type documentType,u.document_number documentNumber,u.email,u.phone,u.active,r.code role FROM users u LEFT JOIN user_roles ur ON ur.user_id=u.id LEFT JOIN roles r ON r.id=ur.role_id WHERE u.id=? ORDER BY r.id LIMIT 1", Long.parseLong(auth.getName()));
+    long id = Long.parseLong(auth.getName());
+    var profile = new java.util.LinkedHashMap<String,Object>(db.queryForMap(
+        "SELECT u.id,u.first_name names,u.last_name surnames,u.document_type documentType,"
+        + "u.document_number documentNumber,u.email,u.phone,u.active FROM users u WHERE u.id=?", id));
+    // Todos los roles, no solo uno: user_roles es N:M. "role" es el de presentacion y usa el
+    // mismo criterio que el token (orden alfabetico), para que ambos no se contradigan.
+    var roles = db.queryForList("SELECT r.code FROM user_roles ur JOIN roles r ON r.id=ur.role_id"
+        + " WHERE ur.user_id=? ORDER BY r.code", String.class, id);
+    if (roles.isEmpty()) roles = java.util.List.of("USER");
+    profile.put("roles", roles);
+    profile.put("role", roles.get(0));
+    return profile;
   }
 
   @GetMapping("/appointments")

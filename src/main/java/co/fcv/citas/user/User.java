@@ -33,5 +33,8 @@ public class User {
   public void changePassword(String encodedPassword) { this.passwordHash = encodedPassword; }
   public boolean isActive() { return active; }
   public void addRole(Role role) { roles.add(role); }
+  /** Rol de presentacion por defecto. El orden alfabetico deja ADMIN < PROFESSIONAL < USER. */
   public String getPrimaryRole() { return roles.stream().map(Role::getCode).sorted().findFirst().orElse("USER"); }
+  /** Todos los roles del usuario: user_roles es N:M y el PRD admite usuarios con varios roles. */
+  public java.util.List<String> getRoleCodes() { var codes = roles.stream().map(Role::getCode).sorted().toList(); return codes.isEmpty() ? java.util.List.of("USER") : codes; }
 }
