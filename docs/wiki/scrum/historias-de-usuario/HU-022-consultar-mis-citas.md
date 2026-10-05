@@ -2,7 +2,7 @@
 id: HU-022
 tipo: historia-de-usuario
 titulo: "Consultar mis citas"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-005-ciclo-de-citas-del-usuario]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento IV — Reserva del usuario"
@@ -54,13 +54,31 @@ Dado una cita REJECTED, cuando USER la ve, entonces se muestra motivo; dado iden
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ProfileAndMyAppointmentsTest.hu022_ca01_* | Filtros status, from y to aplicados en SQL |
+| CA-02 | Cumplido | hu022_ca02_* (2) | Filtros status, from y to aplicados en SQL |
+| CA-03 | Cumplido | hu022_ca03_* (2) | Filtros status, from y to aplicados en SQL |
+| DoD | Cumplido | 5 pruebas backend + 1 frontend del motivo | 4/4 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — S4: CA verificados con pruebas automatizadas y UI conectada; estado `Completada`.
 
 ## Notas y decisiones
-- PREGUNTA ABIERTA: orden, paginación y definición de filtro por fecha inclusivo.
+
+- ~~PREGUNTA ABIERTA: orden, paginación y definición de filtro por fecha inclusivo.~~
+  **Resuelta el 2026-10-02 (S4).**
+
+- **DECISIÓN — orden.** Descendente por fecha de inicio. La UI separa «Próximas» e «Historial» a
+  partir de esa lista, de modo que el orden del contrato no decide la presentación.
+
+- **DECISIÓN — filtro de fecha inclusivo en ambos extremos.** `from` y `to` son fechas, no instantes.
+  El rango se traduce a `[from 00:00, to+1día 00:00)`, así que una cita de las 16:00 del día `to`
+  queda dentro. Tratar `to` como medianoche excluiría casi todas las citas de ese día, que es
+  exactamente lo que el usuario no espera. Verificado en `hu022_ca02_theDateFilterIsInclusiveOnBothEnds`.
+
+- **DECISIÓN — sin paginación.** Un paciente tiene decenas de citas, no miles. Añadir paginación
+  ahora complicaría el contrato sin resolver un problema real; si aparece, se añade como cambio de
+  contrato con evidencia en ambos repositorios.
+
+- **DECISIÓN — filtro de estado múltiple.** `status` admite varios códigos separados por coma, para
+  que la vista de citas activas se resuelva en una sola llamada en lugar de dos.

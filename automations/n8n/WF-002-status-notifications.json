@@ -1,0 +1,262 @@
+{
+  "name": "WF-002 Notificacion por cambio de estado",
+  "nodes": [
+    {
+      "id": "fcceaf21-a5c8-4223-8d2d-0c4e7428ee1e",
+      "name": "Evento de citas-api",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 400],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fcv-citas/status-changed",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "8a97214e-055c-41c4-a967-502c95369ce7",
+      "name": "Normalizar evento",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [224, 400],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            { "id": "ev", "name": "event", "value": "={{ $json.body?.event ?? $json.event ?? \"\" }}", "type": "string" },
+            { "id": "apt", "name": "appointmentId", "value": "={{ $json.body?.appointmentId ?? $json.appointmentId ?? \"\" }}", "type": "string" },
+            { "id": "st", "name": "status", "value": "={{ $json.body?.status ?? $json.status ?? \"\" }}", "type": "string" },
+            { "id": "em", "name": "patientEmail", "value": "={{ $json.body?.patientEmail ?? $json.patientEmail ?? \"\" }}", "type": "string" },
+            { "id": "pn", "name": "patientName", "value": "={{ $json.body?.patientName ?? $json.patientName ?? \"\" }}", "type": "string" },
+            { "id": "pr", "name": "professionalName", "value": "={{ $json.body?.professionalName ?? $json.professionalName ?? \"\" }}", "type": "string" },
+            { "id": "sp", "name": "specialtyName", "value": "={{ $json.body?.specialtyName ?? $json.specialtyName ?? \"\" }}", "type": "string" },
+            { "id": "lo", "name": "locationName", "value": "={{ $json.body?.locationName ?? $json.locationName ?? \"\" }}", "type": "string" },
+            { "id": "sa", "name": "startAt", "value": "={{ $json.body?.startAt ?? $json.startAt ?? \"\" }}", "type": "string" },
+            { "id": "rs", "name": "reason", "value": "={{ $json.body?.reason ?? $json.reason ?? \"\" }}", "type": "string" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1b66e8af-11d3-42c7-bb5f-06003852cfb4",
+      "name": "Payload minimo valido",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [448, 400],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            { "leftValue": "={{ $json.appointmentId }}", "operator": { "type": "string", "operation": "notEmpty" } },
+            { "leftValue": "={{ $json.patientEmail }}", "operator": { "type": "string", "operation": "notEmpty" } },
+            { "leftValue": "={{ $json.event }}", "operator": { "type": "string", "operation": "notEmpty" } }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "75e045f9-2fc9-4eff-a023-59697c5ae7a7",
+      "name": "Ramificar por evento",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [672, 256],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "decision",
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $json.event }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "APPOINTMENT_DECIDED" }],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "reschedule",
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $json.event }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "RESCHEDULE_DECIDED" }],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "cancelled",
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $json.event }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "APPOINTMENT_CANCELLED" }],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": { "fallbackOutput": "extra", "renameFallbackOutput": "Evento desconocido" }
+      }
+    },
+    {
+      "id": "684482de-f67f-4d00-b432-b0d0fd109c4f",
+      "name": "Correo de solicitud resuelta",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [896, 0],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.patientEmail }}",
+        "subject": "=Su solicitud de cita de {{ $json.specialtyName }} fue {{ $json.status === \"APPROVED\" ? \"aprobada\" : \"rechazada\" }}",
+        "emailType": "html",
+        "message": "=<p>Hola {{ $json.patientName }},</p><p>Su solicitud de cita especializada fue <b>{{ $json.status === \"APPROVED\" ? \"APROBADA\" : \"RECHAZADA\" }}</b>.</p><ul><li><b>Especialidad:</b> {{ $json.specialtyName }}</li><li><b>Profesional:</b> {{ $json.professionalName }}</li><li><b>Fecha y hora:</b> {{ new Date($json.startAt).toLocaleString(\"es-CO\") }}</li><li><b>Sede:</b> {{ $json.locationName }}</li></ul>{{ $json.status === \"APPROVED\" ? \"<p>Su horario quedo reservado.</p>\" : \"<p><b>Motivo:</b> \" + $json.reason + \"</p><p>La franja quedo liberada. Puede solicitar otra desde el portal.</p>\" }}<p>Entorno de laboratorio con datos sinteticos.</p>",
+        "options": { "appendAttribution": false }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "0d3be51e-4943-453a-bded-0f0cb9667306",
+      "name": "Correo de reprogramacion",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [896, 192],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.patientEmail }}",
+        "subject": "=Su solicitud de reprogramacion fue {{ $json.status === \"APPROVED\" ? \"aprobada\" : \"rechazada\" }}",
+        "emailType": "html",
+        "message": "=<p>Hola {{ $json.patientName }},</p>{{ $json.status === \"APPROVED\" ? \"<p>Su reprogramacion fue <b>APROBADA</b>. Su cita quedo en la nueva fecha:</p>\" : \"<p>Su reprogramacion fue <b>RECHAZADA</b>. Su cita conserva su fecha original:</p>\" }}<ul><li><b>Especialidad:</b> {{ $json.specialtyName }}</li><li><b>Profesional:</b> {{ $json.professionalName }}</li><li><b>Fecha y hora vigente:</b> {{ new Date($json.startAt).toLocaleString(\"es-CO\") }}</li><li><b>Sede:</b> {{ $json.locationName }}</li></ul>{{ $json.reason ? \"<p><b>Observacion:</b> \" + $json.reason + \"</p>\" : \"\" }}<p>Entorno de laboratorio con datos sinteticos.</p>",
+        "options": { "appendAttribution": false }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "2e9a4813-09a0-4e40-ab8b-cd5177492019",
+      "name": "Correo de cancelacion",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [896, 384],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.patientEmail }}",
+        "subject": "=Su cita de {{ $json.specialtyName }} fue cancelada",
+        "emailType": "html",
+        "message": "=<p>Hola {{ $json.patientName }},</p><p>Confirmamos la <b>cancelacion</b> de su cita:</p><ul><li><b>Especialidad:</b> {{ $json.specialtyName }}</li><li><b>Profesional:</b> {{ $json.professionalName }}</li><li><b>Fecha y hora:</b> {{ new Date($json.startAt).toLocaleString(\"es-CO\") }}</li><li><b>Sede:</b> {{ $json.locationName }}</li></ul><p>La franja quedo liberada. Puede agendar una nueva desde el portal.</p><p>Entorno de laboratorio con datos sinteticos.</p>",
+        "options": { "appendAttribution": false }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "47f2647d-750b-46c6-8ac9-da1a89aaa104",
+      "name": "Trazabilidad",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1120, 112],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            { "id": "wf", "name": "workflow", "value": "WF-002", "type": "string" },
+            { "id": "ev", "name": "event", "value": "={{ $('Normalizar evento').item.json.event }}", "type": "string" },
+            { "id": "apt", "name": "appointmentId", "value": "={{ $('Normalizar evento').item.json.appointmentId }}", "type": "string" },
+            { "id": "ok", "name": "outcome", "value": "={{ $json.id ? \"SENT\" : \"NOT_SENT\" }}", "type": "string" },
+            { "id": "mid", "name": "gmailMessageId", "value": "={{ $json.id ?? \"\" }}", "type": "string" },
+            { "id": "at", "name": "processedAt", "value": "={{ $now.toISO() }}", "type": "string" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "aea5945f-0763-4815-9d1a-87d420c23370",
+      "name": "Responder 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1344, 112],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ received: true, event: $json.event, appointmentId: $json.appointmentId, outcome: $json.outcome }) }}",
+        "options": { "responseCode": 200 }
+      }
+    },
+    {
+      "id": "cd26d6de-1926-4ec7-86e8-fc5dc31c699e",
+      "name": "Responder 400",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [672, 512],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"received\": false, \"error\": \"payload minimo invalido: se requieren event, appointmentId y patientEmail\"}",
+        "options": { "responseCode": 400 }
+      }
+    },
+    {
+      "id": "e1096c58-c588-4cd7-a493-a87b7666dc75",
+      "name": "Responder 422",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [896, 576],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"received\": false, \"error\": \"evento no soportado por WF-002\"}",
+        "options": { "responseCode": 422 }
+      }
+    },
+    {
+      "id": "59b1c2d8-aada-43de-b675-76728ab1c26b",
+      "name": "Sticky Note 9b383dd2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [608, 576],
+      "parameters": {
+        "content": "## WF-002 - Notificacion por cambio de estado\n\n**HU-033.** Disparado por citas-api con POST a la ruta fcv-citas/status-changed.\n\n**Antes de activar:**\n\n1. Crear la credencial Header Auth entrante y configurar el mismo valor en el backend.\n2. Crear la credencial Gmail OAuth2 propia.\n3. Copiar la URL del webhook a STATUS_WEBHOOK_URL en el backend.\n\n**Eventos soportados:** APPOINTMENT_DECIDED, RESCHEDULE_DECIDED y APPOINTMENT_CANCELLED. Cualquier otro recibe 422 y no envia correo: un evento que el workflow no entiende no debe producir un mensaje improvisado.\n\n**Respuesta determinista:** 200 cuando el evento se procesa, 400 cuando falta un campo minimo, 422 cuando el evento es desconocido.\n\n**El correo no bloquea:** cada nodo Gmail usa continueRegularOutput, de modo que un fallo de envio deja traza y responde, en lugar de dejar al backend esperando.\n\nNinguna credencial forma parte de este JSON.",
+        "color": 3
+      }
+    }
+  ],
+  "connections": {
+    "Evento de citas-api": {
+      "main": [[{ "node": "Normalizar evento", "type": "main", "index": 0 }]]
+    },
+    "Normalizar evento": {
+      "main": [[{ "node": "Payload minimo valido", "type": "main", "index": 0 }]]
+    },
+    "Payload minimo valido": {
+      "main": [
+        [{ "node": "Ramificar por evento", "type": "main", "index": 0 }],
+        [{ "node": "Responder 400", "type": "main", "index": 0 }]
+      ]
+    },
+    "Ramificar por evento": {
+      "main": [
+        [{ "node": "Correo de solicitud resuelta", "type": "main", "index": 0 }],
+        [{ "node": "Correo de reprogramacion", "type": "main", "index": 0 }],
+        [{ "node": "Correo de cancelacion", "type": "main", "index": 0 }],
+        [{ "node": "Responder 422", "type": "main", "index": 0 }]
+      ]
+    },
+    "Correo de solicitud resuelta": {
+      "main": [[{ "node": "Trazabilidad", "type": "main", "index": 0 }]]
+    },
+    "Correo de reprogramacion": {
+      "main": [[{ "node": "Trazabilidad", "type": "main", "index": 0 }]]
+    },
+    "Correo de cancelacion": {
+      "main": [[{ "node": "Trazabilidad", "type": "main", "index": 0 }]]
+    },
+    "Trazabilidad": {
+      "main": [[{ "node": "Responder 200", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": {
+    "proyecto": "FCV Proyecto Citas",
+    "hu": "HU-033",
+    "sesion": "S6",
+    "credenciales": "Se configuran en n8n y nunca forman parte de este JSON. Se requieren dos: Header Auth entrante y Gmail OAuth2.",
+    "validacion": "Tres ejecuciones controladas en verde: evento soportado, payload incompleto y evento desconocido."
+  }
+}

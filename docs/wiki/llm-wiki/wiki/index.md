@@ -16,6 +16,17 @@ Wiki global del workspace `FCV_Proyecto_Citas_v1`. Las fuentes originales curada
 - [Riesgos y preguntas abiertas](risks-and-open-questions.md) — asuntos no resueltos.
 - [Registro](log.md) — historial append-only de operaciones de Wiki.
 
-## Estado inicial
+## Evidencia de sesión
 
-Estas páginas son esqueletos deliberados. No contienen decisiones ni contratos inventados; deben completarse mediante INGEST de fuentes aprobadas.
+Vive fuera de la Wiki, en [`../../../evidencia/`](../../../evidencia/), porque es registro de lo
+ocurrido y no síntesis mantenida:
+
+- [`loops/`](../../../evidencia/loops/) — los tres ciclos Builder/Verifier de S4, con log por iteración.
+- [`mcp-n8n.md`](../../../evidencia/mcp-n8n.md) — cliente y servidor MCP, workflows creados y ejecuciones controladas.
+- [`seguridad-contenido-no-confiable.md`](../../../evidencia/seguridad-contenido-no-confiable.md) — las cuatro superficies de contenido no confiable y los ocho riesgos residuales.
+
+## Estado
+
+Actualizado al 2026-10-04, tras S4, S5 y S6. `automations.md` y
+`risks-and-open-questions.md` están mantenidas; el resto conserva el nivel de detalle con que se
+crearon y se completa mediante INGEST de fuentes aprobadas, sin inventar decisiones ni contratos.

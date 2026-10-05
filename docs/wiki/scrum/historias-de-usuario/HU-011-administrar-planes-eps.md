@@ -2,7 +2,7 @@
 id: HU-011
 tipo: historia-de-usuario
 titulo: "Administrar planes de EPS"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-003-catalogos-y-gestion-de-profesionales]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -54,13 +54,14 @@ Dado una EPS, cuando se consultan sus planes disponibles, entonces no aparecen p
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | InsuranceManagementTest.hu011_ca01_* (3) | El plan no cambia de EPS: lo reescribiría en afiliaciones |
+| CA-02 | Cumplido | hu011_ca02_* (2) | El plan no cambia de EPS: lo reescribiría en afiliaciones |
+| CA-03 | Cumplido | hu011_ca03_thePlansOfOneEpsNeverAppear... | El plan no cambia de EPS: lo reescribiría en afiliaciones |
+| DoD | Cumplido | 6 pruebas + gestión de planes por EPS | 4/4 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — S4: CA verificados con pruebas automatizadas y UI conectada; estado `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: atributos identificadores de un plan y alcance exacto de “cuando aplique”.

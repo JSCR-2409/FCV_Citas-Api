@@ -2,7 +2,7 @@
 id: HU-026
 tipo: historia-de-usuario
 titulo: "Cerrar atención"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-006-operacion-del-profesional]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento V — Operación clínica simulada"
@@ -54,13 +54,14 @@ Dado un cierre exitoso, cuando USER/ADMIN consultan la cita conforme a sus permi
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ProfessionalAgendaAndAuditTest.hu026_ca01_* (2) | La franja no se libera: la atención ya ocurrió |
+| CA-02 | Cumplido | hu026_ca02_* (4) | La franja no se libera: la atención ya ocurrió |
+| CA-03 | Cumplido | hu026_ca03_closingDoesNotReleaseTheSlot | La franja no se libera: la atención ya ocurrió |
+| DoD | Cumplido | 8 pruebas + botones Atendida y No asistió | 4/4 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — S4: CA verificados con pruebas automatizadas y UI conectada; estado `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: estados de origen y criterio exacto de “pasada/aplicable”.

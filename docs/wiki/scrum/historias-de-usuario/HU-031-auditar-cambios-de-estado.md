@@ -2,7 +2,7 @@
 id: HU-031
 tipo: historia-de-usuario
 titulo: "Auditar cambios de estado"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-007-operacion-administrativa-y-auditoria]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento V — Operación clínica simulada"
@@ -54,13 +54,14 @@ Dado un evento existente, cuando se intenta editarlo o borrarlo mediante CRUD no
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ProfessionalAgendaAndAuditTest.hu031_ca01_* (3) | AppointmentStatusLog centraliza las 6 transiciones |
+| CA-02 | Cumplido | hu031_ca02_* (2) | AppointmentStatusLog centraliza las 6 transiciones |
+| CA-03 | Cumplido | hu031_ca03_onlyAdminCanReadTheHistory | AppointmentStatusLog centraliza las 6 transiciones |
+| DoD | Cumplido | 6 pruebas + panel de auditoría | 4/4 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — S4: CA verificados con pruebas automatizadas y UI conectada; estado `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: qué roles pueden consultar el historial y el nivel de detalle visible a USER/PROFESSIONAL.

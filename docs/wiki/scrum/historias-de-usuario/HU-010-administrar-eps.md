@@ -2,7 +2,7 @@
 id: HU-010
 tipo: historia-de-usuario
 titulo: "Administrar EPS"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-003-catalogos-y-gestion-de-profesionales]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -54,13 +54,14 @@ Dado USER o PROFESSIONAL, cuando intenta administrar EPS, entonces backend lo re
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | InsuranceManagementTest.hu010_ca01_* (2) | Sin DELETE: la baja es active=false, por RF-06 |
+| CA-02 | Cumplido | hu010_ca02_* (2) | Sin DELETE: la baja es active=false, por RF-06 |
+| CA-03 | Cumplido | hu010_ca03_onlyAdminCanManageEps | Sin DELETE: la baja es active=false, por RF-06 |
+| DoD | Cumplido | 5 pruebas + panel de convenios | 4/4 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — S4: CA verificados con pruebas automatizadas y UI conectada; estado `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: campos y regla de unicidad de EPS no están especificados.

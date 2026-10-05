@@ -31,3 +31,10 @@ app:
     # porque el envio real de correo es opcional. El valor por defecto es false: si esta propiedad
     # llegara a un entorno real sin configurar, el token no se devuelve en la respuesta.
     expose-token: ${RECOVERY_EXPOSE_TOKEN:false}
+  integrations:
+    # HU-032 y HU-033. Sin valores por defecto: si no estan definidos, los endpoints de integracion
+    # quedan cerrados y el webhook de salida no intenta ningun envio. Un token por defecto
+    # versionado seria un token conocido.
+    token: ${INTEGRATION_TOKEN:}
+    status-webhook-url: ${STATUS_WEBHOOK_URL:}
+    webhook-secret: ${STATUS_WEBHOOK_SECRET:}

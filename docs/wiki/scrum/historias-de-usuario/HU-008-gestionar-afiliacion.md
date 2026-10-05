@@ -2,7 +2,7 @@
 id: HU-008
 tipo: historia-de-usuario
 titulo: "Gestionar afiliación"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-002-identidad-sesion-y-perfil]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -53,13 +53,29 @@ Dado un USER, cuando consulta o cambia afiliación, entonces solo opera la propi
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | InsuranceManagementTest.hu008_ca01_* (3) | Sin copiar nombres: solo plan_id, resto por JOIN |
+| CA-02 | Cumplido | hu008_ca02_* (2) | Sin copiar nombres: solo plan_id, resto por JOIN |
+| CA-03 | Cumplido | hu008_ca03_* (2) | Sin copiar nombres: solo plan_id, resto por JOIN |
+| DoD | Cumplido | 7 pruebas + panel de afiliación en el portal | 4/4 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — S4: CA verificados con pruebas automatizadas y UI conectada; estado `Completada`.
 
 ## Notas y decisiones
-- El estado de activación de EPS/plan en una afiliación existente requiere contrato aprobado.
+
+- **DECISIÓN — estado de activación en una afiliación existente.** Si la EPS o el plan se desactivan,
+  la afiliación **no se borra ni se invalida**: sigue siendo la del usuario y conserva su referente,
+  conforme a RF-06. El contrato expone `catalogActive: false` para que la UI pueda pedirle que
+  registre una vigente, sin bloquearle el resto del portal. Verificado en
+  `hu010_ca02_anEpsIsDeactivatedAndNeverPhysicallyDeleted`.
+
+- **DECISIÓN — una sola afiliación vigente.** RF-04 exige «evitar duplicar EPS, régimen y plan dentro
+  del usuario». En lugar de acumular filas activas, al guardar una nueva la anterior pasa a
+  `is_current=false` y queda como histórico. Volver a una afiliación anterior reactiva la fila
+  existente, porque `uq_user_membership` lo impediría de otro modo.
+
+- **DECISIÓN — el cliente envía solo `planId`.** El plan ya determina su EPS y su régimen, así que
+  pedir los tres crearía la posibilidad de una combinación incoherente, que es justo lo que CA-02
+  prohíbe. Si el cliente envía `epsId` y no corresponde, la petición se rechaza en lugar de elegir
+  cuál de los dos vale.

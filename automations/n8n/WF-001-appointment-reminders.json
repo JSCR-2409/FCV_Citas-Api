@@ -1,0 +1,141 @@
+{
+  "name": "WF-001 Recordatorio de citas proximas",
+  "nodes": [
+    {
+      "id": "331177df-8707-4e04-931e-1b40f2302c70",
+      "name": "Cada dia a las 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [0, 96],
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "days", "daysInterval": 1, "triggerAtHour": 8, "triggerAtMinute": 0 }
+          ]
+        },
+        "misfirePolicy": "skip"
+      }
+    },
+    {
+      "id": "bfca7ca6-32eb-4641-8286-47f4c999df2d",
+      "name": "Consultar citas proximas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [224, 96],
+      "parameters": {
+        "method": "GET",
+        "url": "https://CAMBIAR-POR-LA-URL-DE-LA-API/api/v1/integrations/appointments/upcoming",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpTemplatedCustomAuth",
+        "sendQuery": true,
+        "specifyQuery": "keypair",
+        "queryParameters": { "parameters": [{ "name": "withinHours", "value": "24" }] },
+        "options": { "timeout": 15000 }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "bbf6b60c-846e-4e2a-a595-d7c7340d0045",
+      "name": "Una cita por item",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [448, 0],
+      "parameters": { "fieldToSplitOut": "items", "options": {} }
+    },
+    {
+      "id": "8c652221-6458-4485-8e1c-a865b871c4dc",
+      "name": "Registrar API no disponible",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [448, 192],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            { "id": "wf", "name": "workflow", "value": "WF-001", "type": "string" },
+            { "id": "err", "name": "outcome", "value": "API_UNAVAILABLE", "type": "string" },
+            { "id": "msg", "name": "error", "value": "={{ $json.error ?? $json.message }}", "type": "string" },
+            { "id": "at", "name": "failedAt", "value": "={{ $now.toISO() }}", "type": "string" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "d7a0cc32-7c12-4365-88a6-d08654d3fcf7",
+      "name": "Enviar recordatorio",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [672, 0],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.patientEmail }}",
+        "subject": "=Recordatorio de su cita de {{ $json.specialtyName }}",
+        "emailType": "html",
+        "message": "=<p>Hola {{ $json.patientName }},</p><p>Le recordamos su cita:</p><ul><li><b>Especialidad:</b> {{ $json.specialtyName }}</li><li><b>Profesional:</b> {{ $json.professionalName }}</li><li><b>Fecha y hora:</b> {{ new Date($json.startAt).toLocaleString(\"es-CO\") }}</li><li><b>Duracion:</b> {{ $json.durationMinutes }} minutos</li><li><b>Sede:</b> {{ $json.locationName }} - {{ $json.locationAddress }}</li></ul><p>Si no puede asistir, cancele o reprograme desde el portal.</p><p>Entorno de laboratorio con datos sinteticos.</p>",
+        "options": { "appendAttribution": false }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "69145638-2ef5-42ad-8396-1986296b3d5a",
+      "name": "Registrar resultado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [896, 0],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            { "id": "wf", "name": "workflow", "value": "WF-001", "type": "string" },
+            { "id": "apt", "name": "appointmentId", "value": "={{ $('Una cita por item').item.json.appointmentId }}", "type": "string" },
+            { "id": "sent", "name": "gmailMessageId", "value": "={{ $json.id }}", "type": "string" },
+            { "id": "ok", "name": "delivered", "value": "={{ $json.id ? true : false }}", "type": "boolean" },
+            { "id": "at", "name": "processedAt", "value": "={{ $now.toISO() }}", "type": "string" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "4e0019f7-11be-43c4-aea4-c524fc425c2a",
+      "name": "Sticky Note 647ab656",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [384, 192],
+      "parameters": {
+        "content": "## WF-001 - Recordatorio de citas proximas\n\n**HU-032.** Antes de activar:\n\n1. Sustituir CAMBIAR-POR-LA-URL-DE-LA-API por la URL publica de la API.\n2. Crear la credencial de autenticacion con la plantilla de cabecera X-Integration-Token y el valor de INTEGRATION_TOKEN.\n3. Crear la credencial Gmail OAuth2 propia de cada estudiante.\n\n**Antiduplicados:** la ventana es de 24 h y el disparo es diario a la misma hora, de modo que las ventanas consecutivas no se solapan y ninguna cita entra en dos. misfirePolicy skip evita que una ejecucion perdida reenvie una ventana ya cubierta.\n\n**CANCELLED y REJECTED** no llegan nunca: el endpoint filtra por status APPROVED.\n\n**API caida:** 3 reintentos y, si persiste, la rama de error registra API_UNAVAILABLE sin enviar nada.\n\nNinguna credencial forma parte de este JSON.",
+        "color": 4
+      }
+    }
+  ],
+  "connections": {
+    "Cada dia a las 08:00": {
+      "main": [[{ "node": "Consultar citas proximas", "type": "main", "index": 0 }]]
+    },
+    "Consultar citas proximas": {
+      "main": [
+        [{ "node": "Una cita por item", "type": "main", "index": 0 }],
+        [{ "node": "Registrar API no disponible", "type": "main", "index": 0 }]
+      ]
+    },
+    "Una cita por item": {
+      "main": [[{ "node": "Enviar recordatorio", "type": "main", "index": 0 }]]
+    },
+    "Enviar recordatorio": {
+      "main": [[{ "node": "Registrar resultado", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": {
+    "proyecto": "FCV Proyecto Citas",
+    "hu": "HU-032",
+    "sesion": "S5",
+    "credenciales": "Se configuran en n8n y nunca forman parte de este JSON. Se requieren dos: la plantilla de cabecera X-Integration-Token y Gmail OAuth2."
+  }
+}

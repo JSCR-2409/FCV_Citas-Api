@@ -2,7 +2,7 @@
 id: HU-033
 tipo: historia-de-usuario
 titulo: "Notificar cambios de estado"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-008-automatizaciones-posteriores]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento VI — Automatizaciones posteriores"
@@ -54,13 +54,14 @@ Dado una falla o éxito del workflow, cuando termina, entonces no modifica la tr
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | Ejecución controlada 1 de WF-002: identifica cita, estado y destinatario | Ver `docs/evidencia/mcp-n8n.md` |
+| CA-02 | Cumplido | `WF-002-status-notifications.json` sin credenciales; la salida de prueba no expone secretos | Verificado con grep sobre los tres JSON |
+| CA-03 | Cumplido | 166 pruebas de backend en verde con el notificador conectado; es asíncrono y no propaga errores | Desactivado si no hay URL configurada |
+| DoD | Cumplido | 4/4 | Tres ejecuciones controladas, una por rama |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-04 — S6: WF-002 construido, validado con tres ejecuciones controladas y versionado; estado `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: eventos/notificaciones destinatarios y autenticación concreta del webhook.

@@ -2,7 +2,7 @@
 id: HU-023
 tipo: historia-de-usuario
 titulo: "Cancelar cita"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-005-ciclo-de-citas-del-usuario]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento IV — Reserva del usuario"
@@ -54,13 +54,29 @@ Dado una cancelación exitosa, cuando se revisa historial/operación posterior, 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ProfileAndMyAppointmentsTest.hu023_ca01_* | CANCELLED es terminal y libera las franjas |
+| CA-02 | Cumplido | hu023_ca02_* (3) | CANCELLED es terminal y libera las franjas |
+| CA-03 | Cumplido | hu023_ca03_aCancelledAppointmentCannotBeCancelledAgain | CANCELLED es terminal y libera las franjas |
+| DoD | Cumplido | 5 pruebas; historial verificado en la misma prueba | 4/4 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — S4: CA verificados con pruebas automatizadas y UI conectada; estado `Completada`.
 
 ## Notas y decisiones
-- PREGUNTA ABIERTA: conjunto exacto de estados terminales para efectos de cancelación.
+
+- ~~PREGUNTA ABIERTA: conjunto exacto de estados terminales para efectos de cancelación.~~
+  **Resuelta el 2026-10-02 (S4).**
+
+- **DECISIÓN — estados cancelables.** Solo `APPROVED` y `REQUESTED`. Terminales, y por tanto no
+  cancelables: `CANCELLED`, `REJECTED`, `COMPLETED` y `NO_SHOW`. `COMPLETED` y `NO_SHOW` describen una
+  atención que ya ocurrió, y cancelarla reescribiría un hecho; `REJECTED` y `CANCELLED` ya liberaron
+  sus franjas. Verificado en `hu023_ca02_aCompletedAppointmentIsTerminalForTheUser` y
+  `hu023_ca03_aCancelledAppointmentCannotBeCancelledAgain`.
+
+- Las tres condiciones —cita propia, futura y en estado cancelable— van en la guarda del mismo
+  `UPDATE`, no comprobadas por separado: así no hay ventana entre la lectura y la escritura. El
+  `0` filas afectadas se traduce a `409`.
+
+- Cancelar la cita cierra también la reprogramación pendiente que tuviera, porque el ADMIN ya no
+  tiene que decidir sobre una cita que no existe.

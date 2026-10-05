@@ -1,0 +1,115 @@
+{
+  "name": "WF-003 Resumen operativo diario",
+  "nodes": [
+    {
+      "id": "df3755d5-dc53-4f51-b919-dd6d576b6861",
+      "name": "Cada dia a las 19:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [0, 96],
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "days", "daysInterval": 1, "triggerAtHour": 19, "triggerAtMinute": 0 }
+          ]
+        },
+        "misfirePolicy": "skip"
+      }
+    },
+    {
+      "id": "fe1c0d30-3b57-48c0-9fe7-16a92468c8cc",
+      "name": "Consultar resumen del dia",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [224, 96],
+      "parameters": {
+        "method": "GET",
+        "url": "https://CAMBIAR-POR-LA-URL-DE-LA-API/api/v1/integrations/daily-summary",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpTemplatedCustomAuth",
+        "options": { "timeout": 15000 }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "0a41ac9a-1145-4542-bdde-25f019f1f269",
+      "name": "Construir resumen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [448, 0],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const data = $input.first().json;\nconst rows = data.byLocationAndStatus || [];\nconst specialties = data.bySpecialty || [];\n\n// Conteos por sede y por estado, a partir de la misma lista: el backend agrupa y aqui solo\n// se reorganiza para redactar, sin recalcular nada.\nconst bySite = {};\nconst byStatus = {};\nfor (const row of rows) {\n  bySite[row.locationName] = (bySite[row.locationName] || 0) + row.total;\n  byStatus[row.status] = (byStatus[row.status] || 0) + row.total;\n}\n\nconst line = (label, value) => `<li><b>${label}:</b> ${value}</li>`;\nconst siteLines = Object.keys(bySite).sort().map(k => line(k, bySite[k])).join(\"\");\nconst statusLines = [\"APPROVED\", \"COMPLETED\", \"NO_SHOW\", \"CANCELLED\", \"REQUESTED\", \"REJECTED\"]\n  .filter(code => byStatus[code])\n  .map(code => line(code, byStatus[code])).join(\"\");\nconst specialtyLines = specialties.map(s => line(s.specialtyName, s.total)).join(\"\");\n\nconst html = `<p>Resumen operativo del <b>${data.date}</b>.</p>`\n  + `<p>Total de citas del dia: <b>${data.total}</b></p>`\n  + (siteLines ? `<p>Por sede:</p><ul>${siteLines}</ul>` : \"\")\n  + (statusLines ? `<p>Por estado:</p><ul>${statusLines}</ul>` : \"\")\n  + (specialtyLines ? `<p>Por especialidad:</p><ul>${specialtyLines}</ul>` : \"\")\n  + (data.total === 0 ? \"<p>No hubo citas programadas para este dia.</p>\" : \"\")\n  + \"<p>Entorno de laboratorio con datos sinteticos.</p>\";\n\nreturn [{ json: { date: data.date, total: data.total, html } }];"
+      }
+    },
+    {
+      "id": "3b5c80ad-b22d-4baa-bdd0-a9091c6ffea8",
+      "name": "Enviar resumen",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [672, 0],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "CAMBIAR-POR-EL-CORREO-DE-OPERACION@example.test",
+        "subject": "=Resumen operativo FCV Citas - {{ $json.date }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": { "appendAttribution": false }
+      }
+    },
+    {
+      "id": "ec069a48-6467-44c4-96dc-441f190ca945",
+      "name": "Avisar incidencia de API",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [448, 192],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "CAMBIAR-POR-EL-CORREO-DE-OPERACION@example.test",
+        "subject": "Resumen operativo FCV Citas - incidencia",
+        "emailType": "html",
+        "message": "=<p>No fue posible generar el resumen operativo: la API no respondio tras los reintentos.</p><p><b>Detalle:</b> {{ $json.error ?? $json.message }}</p><p><b>Momento:</b> {{ $now.toISO() }}</p>",
+        "options": { "appendAttribution": false }
+      }
+    },
+    {
+      "id": "2dd7671e-027d-4219-9029-83cad1fbd879",
+      "name": "Sticky Note a4af2843",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [272, 192],
+      "parameters": {
+        "content": "## WF-003 - Resumen operativo diario\n\n**HU-034, opcional.** Lee /api/v1/integrations/daily-summary y envia un correo con los totales del dia.\n\n**Antes de activar:**\n\n1. Sustituir CAMBIAR-POR-LA-URL-DE-LA-API y CAMBIAR-POR-EL-CORREO-DE-OPERACION.\n2. Reutilizar la credencial del token de integracion creada para WF-001.\n3. Reutilizar la credencial Gmail OAuth2.\n\n**Sin datos de pacientes:** el endpoint devuelve conteos agrupados por sede, estado y especialidad. Un resumen no necesita el nombre ni el correo de nadie.\n\n**Incidencias de API:** 3 reintentos y, si persiste, un correo de incidencia. Un resumen ausente se confundiria con un dia sin actividad.\n\nNinguna credencial forma parte de este JSON.",
+        "color": 5
+      }
+    }
+  ],
+  "connections": {
+    "Cada dia a las 19:00": {
+      "main": [[{ "node": "Consultar resumen del dia", "type": "main", "index": 0 }]]
+    },
+    "Consultar resumen del dia": {
+      "main": [
+        [{ "node": "Construir resumen", "type": "main", "index": 0 }],
+        [{ "node": "Avisar incidencia de API", "type": "main", "index": 0 }]
+      ]
+    },
+    "Construir resumen": {
+      "main": [[{ "node": "Enviar resumen", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": {
+    "proyecto": "FCV Proyecto Citas",
+    "hu": "HU-034",
+    "sesion": "S6 (opcional / bonus)",
+    "credenciales": "Se configuran en n8n y nunca forman parte de este JSON. Reutiliza las dos de WF-001."
+  }
+}

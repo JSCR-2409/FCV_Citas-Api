@@ -122,3 +122,50 @@ especialidades; HU-013 alta de profesionales; HU-014 asignacion de especialidade
 principal en la propia UI; y HU-015 seleccion de sedes y conmutador de estado operativo.
 
 **HECHO:** Backlog: 16 HU `Completada`, ninguna en validacion, 18 pendientes de S4 y S5.
+
+## 2026-10-04 — S4, S5 y S6: MVP, loops y automatizaciones
+
+**HECHO:** Cerrado el alcance de backend de S4 con diez HU: HU-006, HU-007, HU-008, HU-010, HU-011,
+HU-022, HU-023, HU-025, HU-026 y HU-031. Suite de 88 a 153 pruebas.
+
+**HECHO — defecto de seguridad cerrado:** `POST /api/auth/password-reset` cambiaba la contrasena de
+cualquier cuenta conociendo unicamente su email, sin ninguna prueba de posesion del buzon. Retirado y
+reemplazado por el flujo con token de un solo uso que exige RF-03.
+
+**DECISION:** La solicitud de recuperacion responde `200` con el mismo cuerpo exista o no la cuenta.
+Devolver `404` convertiria el endpoint en un oraculo para enumerar los correos registrados.
+
+**HECHO:** `appointment_status_history` existia en el esquema desde el principio pero ninguna
+transicion escribia en ella: la auditoria de RF-19 estaba vacia aunque las citas cambiaran de estado.
+`AppointmentStatusLog` centraliza la escritura y la conectan las seis transiciones.
+
+**HECHO — tres defectos que las pruebas dejaron al descubierto:** `GET /me` tomaba las claves del JSON
+de los metadatos del driver, asi que la forma del contrato cambiaba entre MySQL y H2; `PATCH /me`
+escribia por JPA y releia por JDBC, de modo que devolvia los valores anteriores al cambio; y revocar
+sesiones con un `UPDATE` por JDBC no invalidaba las entidades que JPA ya tenia cargadas.
+
+**HECHO:** Tres ciclos Builder/Verifier registrados en `docs/evidencia/loops/`, cada uno sobre una
+condicion reproducible con presupuesto de dos iteraciones. En LOOP-02 la condicion de escalamiento se
+activo de verdad: un problema de HU-030 se abrio como trabajo aparte en lugar de ampliar el alcance.
+
+**HECHO:** Tres workflows n8n construidos por MCP y versionados sin credenciales: WF-001
+recordatorios, WF-002 notificacion por cambio de estado y WF-003 resumen operativo. Suite de 153 a
+166 pruebas con los endpoints de integracion.
+
+**DECISION:** Las automatizaciones se autentican con un token de servicio en `X-Integration-Token` y
+no con un JWT de usuario. n8n no es una persona: no tiene perfil, no renueva sesion y no debe quedar
+atado a la cuenta de nadie, porque desactivar a ese usuario romperia la automatizacion en silencio.
+El token tiene autoridad propia y no reutiliza `ADMIN`.
+
+**DECISION:** El webhook de salida es asincrono, no propaga errores y esta desactivado por defecto.
+Una automatizacion de notificacion no puede influir en la operacion clinica: que n8n este caido no
+puede impedir que un ADMIN apruebe una cita.
+
+**HECHO:** WF-002 validado con tres ejecuciones controladas, una por rama. Las dos que importan son
+las de rechazo: un payload incompleto recibe `400` y un evento desconocido `422`, sin enviar correo.
+
+**HECHO:** Los tres workflows quedan **inactivos** a proposito. S6 lo exige de forma literal y la
+salida esperada es un correo, que no se puede validar sin la credencial de Gmail.
+
+**HECHO:** Backlog: 29 HU `Completada`, 2 `En validación` (HU-032 y HU-034, por topologia de red) y 5
+`Pendiente de aprobación` (HU-001 a HU-005, alcance de S2).

@@ -25,7 +25,9 @@ public class RescheduleRequestAdminController {
 
   private final AppointmentStatusLog history;
 
-  public RescheduleRequestAdminController(JdbcTemplate db, AppointmentStatusLog history) { this.db = db; this.history = history; }
+  private final co.fcv.citas.integration.StatusChangeNotifier notifier;
+
+  public RescheduleRequestAdminController(JdbcTemplate db, AppointmentStatusLog history, co.fcv.citas.integration.StatusChangeNotifier notifier) { this.db = db; this.history = history; this.notifier = notifier; }
 
   @GetMapping
   ResponseEntity<?> list(@RequestParam(required = false) Long locationId,
@@ -149,6 +151,11 @@ public class RescheduleRequestAdminController {
           AppointmentStatusLog.SOURCE_ADMIN,
           "Reprogramación aprobada: " + previousStart + " → " + requestedStart);
     }
+
+    // HU-033: reprogramacion aprobada o rechazada, segundo evento de WF-002. Se publica en los dos
+    // casos porque el paciente necesita saberlo igual: una aprobacion le cambia la hora y un
+    // rechazo le confirma que conserva la original.
+    notifier.publish("RESCHEDULE_DECIDED", appointmentId, d.status(), d.reason());
 
     return ResponseEntity.ok(Map.of("id", id, "appointmentId", appointmentId, "status", d.status(),
         "reason", d.reason() == null ? "" : d.reason()));

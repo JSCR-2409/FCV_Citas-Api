@@ -30,3 +30,26 @@ devolvía `USER` mientras el token decía `ADMIN`.
 Un rol adicional **no** otorga permisos de otro: cada autoridad se concede solo si el rol está en
 `user_roles`. Verificado en `CatalogAndAuthorizationTest.aUserWithSeveralRolesGetsAllOfThem` y
 `aUserWithASingleRoleDoesNotGainOthers`.
+
+## Recuperación de contraseña — versión 1.2
+
+Alcance: HU-006. **Cambio incompatible:** se retira `POST /api/auth/password-reset`, que cambiaba la
+contraseña de cualquier cuenta conociendo únicamente su email, sin ninguna prueba de posesión del
+buzón. En su lugar:
+
+* `POST /api/auth/recovery/request` recibe `email`. Devuelve **siempre** `200` con el mismo cuerpo,
+  exista o no la cuenta: distinguir los dos casos convertiría el endpoint en un oráculo para enumerar
+  los correos registrados. El cuerpo lleva `message`, y lleva además `token` **solo** cuando
+  `app.recovery.expose-token` es `true`, que es el canal de desarrollo que admite RF-03 porque el
+  envío de correo es opcional. El valor por defecto de esa propiedad es `false`.
+* `POST /api/auth/recovery/confirm` recibe `token` y `password`. Devuelve `204`. Un token inexistente,
+  vencido o ya usado devuelve `400` sin alterar la contraseña, y lo mismo una contraseña de menos de
+  8 caracteres. Consumir el token **revoca todas las sesiones vivas** de la cuenta.
+
+El token es de 32 bytes aleatorios en hexadecimal, vive 30 minutos y es de un solo uso. De él se
+almacena únicamente el SHA-256 en `password_reset_tokens`. Pedir un token nuevo invalida el anterior,
+de modo que un token filtrado deja de servir en cuanto el titular legítimo vuelve a solicitarlo.
+
+Evidencia cross-repo: `PasswordRecoveryTest` (11 pruebas) en el backend y la pantalla de recuperación
+en `FCV_Citas-Web/src/app/pages/recovery.ts`, que ahora exige el código y ya no afirma que la cuenta
+exista.

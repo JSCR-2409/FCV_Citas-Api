@@ -71,20 +71,43 @@ Las RN-01 a RN-12 aparecen en las reglas, criterios y DoD de [[HU-016-crear-bloq
 
 Las 34 HU se crearon en `Pendiente de aprobación`. S2, S3 y S4 deben seleccionar explícitamente una HU, respetar sus dependencias y actualizar su evidencia de validación.
 
-Estado del backlog al 2026-10-02, tras la verificación del alcance S3:
+Estado del backlog al 2026-10-04, tras cerrar el alcance de S3, S4, S5 y S6:
 
 | Estado | HU | Criterio |
 |---|---|---|
-| `Completada` | HU-009, HU-012 a HU-021, HU-024, HU-027 a HU-030 | CA verificados con pruebas automatizadas y DoD cumplida, incluida la UI correspondiente |
-| `Pendiente de aprobación` | las 18 restantes | Sin abordar; corresponden a S4 y S5 |
+| `Completada` | HU-006 a HU-012, HU-013 a HU-031, HU-033 | CA verificados con pruebas automatizadas y DoD cumplida, incluida la UI correspondiente |
+| `En validación` | HU-032, HU-034 | Workflow construido, validado y versionado; su CA-01 exige una ejecución contra una API alcanzable |
+| `Pendiente de aprobación` | HU-001 a HU-005 | Alcance de S2; implementadas en código, sin regularizar su evidencia |
 
-Con esto **el alcance funcional de S3 queda cerrado**: administración de profesionales y
-asignaciones, gestión de bloques de disponibilidad, consulta de disponibilidad, cita general
-auto-aprobada, cita especializada en `REQUESTED` y resolución por el ADMIN, cada una con su UI.
+**S3** cerró la agenda y la reserva: administración de profesionales y asignaciones, gestión de
+bloques, consulta de disponibilidad, cita general auto-aprobada, cita especializada en `REQUESTED` y
+resolución por el ADMIN, cada una con su UI.
+
+**S4** cerró el MVP: recuperación de contraseña con token de un solo uso, perfil, afiliación a EPS y
+plan, catálogo configurable de EPS y planes, mis citas con filtros y motivo de rechazo, cancelación
+con historial, agenda del profesional, cierre de atención y auditoría de cambios de estado. La
+evidencia de los ciclos Builder/Verifier vive en [`docs/evidencia/loops/`](../../evidencia/loops/).
+
+**S5 y S6** añadieron las automatizaciones sin tocar el núcleo: tres workflows n8n construidos por
+MCP y versionados como JSON sin credenciales, un token de servicio con autoridad propia y un webhook
+de salida asíncrono. La evidencia está en [`docs/evidencia/mcp-n8n.md`](../../evidencia/mcp-n8n.md) y
+los riesgos residuales en
+[`docs/evidencia/seguridad-contenido-no-confiable.md`](../../evidencia/seguridad-contenido-no-confiable.md).
 
 La evidencia de cada HU vive en su propia tabla **Evidencia de validación**, con el nombre de la
-prueba que respalda cada criterio. La suite de backend es de 88 pruebas y está en verde.
+prueba que respalda cada criterio. La suite de backend es de **166 pruebas** y está en verde; la de
+frontend, de 8.
 
-HU-024, HU-029 y HU-030 pertenecen a S4, pero se abordaron al detectar que la reprogramación no
+HU-024, HU-029 y HU-030 pertenecen a S4, pero se abordaron en S3 al detectar que la reprogramación no
 existía en ninguna capa. Cada una se validó con sus propias pruebas, conforme a la regla de
 `PLAN_AJUSTADO_S3_S5.md` de no fusionar las tres en un mismo bloque de verificación.
+
+### Por qué HU-032 y HU-034 no están completas
+
+Su CA-01 dice «cuando corre el workflow». Los dos workflows están construidos, validados y
+versionados, pero su nodo HTTP apunta a un marcador de posición: la instancia de n8n es en la nube y
+la API corre en `localhost:8080`, de modo que no hay forma de que una alcance a la otra sin exponer o
+desplegar el backend. Dar esos CA por cumplidos sería afirmar una evidencia que no existe.
+
+HU-033 sí está completa porque sus tres CA se verifican sin eso: el webhook se validó con tres
+ejecuciones controladas, una por rama.

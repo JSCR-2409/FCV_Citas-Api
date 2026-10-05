@@ -2,7 +2,7 @@
 id: HU-032
 tipo: historia-de-usuario
 titulo: "Recordar citas próximas"
-estado: Pendiente de aprobación
+estado: En validación
 epica: "[[EP-008-automatizaciones-posteriores]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento VI — Automatizaciones posteriores"
@@ -54,13 +54,14 @@ Dado una ejecución, cuando finaliza, entonces no cambia estado, reserva ni regl
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Parcial | `IntegrationEndpointsTest.ca01_*` (4) verifican la selección en el backend | Falta ejecutar WF-001 contra una API alcanzable |
+| CA-02 | Cumplido | `WF-001-appointment-reminders.json`, JSON válido y sin credenciales | Verificado con grep |
+| CA-03 | Cumplido | `IntegrationEndpointsTest.ca03_*` (2): el endpoint es de solo lectura | No existe ningún método de escritura |
+| DoD | Parcial | 3/4: falta la evidencia de ejecución de CA-01 | Ver riesgos residuales 4.6 y 4.7 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-04 — S5: WF-001 construido, validado y versionado. CA-01 pendiente de ejecucion real; estado `En validación`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: ventana de “próxima”, contenido del recordatorio y manejo de citas canceladas.

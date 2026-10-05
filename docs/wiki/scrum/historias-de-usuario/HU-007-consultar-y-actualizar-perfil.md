@@ -2,7 +2,7 @@
 id: HU-007
 tipo: historia-de-usuario
 titulo: "Consultar y actualizar perfil"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-002-identidad-sesion-y-perfil]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -54,13 +54,28 @@ Dado un campo no permitido o un perfil ajeno, cuando se intenta modificar, enton
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ProfileAndMyAppointmentsTest.hu007_ca01_* | Matriz aprobada: names, surnames y phone |
+| CA-02 | Cumplido | hu007_ca02_anAllowedFieldIsPersisted... | Matriz aprobada: names, surnames y phone |
+| CA-03 | Cumplido | hu007_ca03_* (3) | Matriz aprobada: names, surnames y phone |
+| DoD | Cumplido | 6 pruebas + PATCH /me en la UI del paciente | 4/4 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — S4: CA verificados con pruebas automatizadas y UI conectada; estado `Completada`.
 
 ## Notas y decisiones
-- PREGUNTA ABIERTA: lista exacta de datos permitidos para actualización.
+
+- ~~PREGUNTA ABIERTA: lista exacta de datos permitidos para actualización.~~
+  **Resuelta el 2026-10-02 (S4).**
+
+- **DECISIÓN — matriz de campos editables.** Editables por su titular: `names`, `surnames` y `phone`.
+  Fuera: el documento y el email, porque identifican la cuenta y son clave de unicidad y de inicio de
+  sesión; el estado `active` y los roles, porque son decisiones administrativas. El resto del perfil
+  es de solo lectura.
+
+- La protección no es una lista de rechazo sino de admisión: el controlador lee exactamente esos tres
+  campos del cuerpo, de modo que un campo no permitido no se ignora *después* de leerse, sino que no
+  se lee. Verificado en `hu007_ca03_identityFieldsCannotBeChangedThroughTheProfile`.
+
+- El identificador del usuario sale del token, nunca del cuerpo ni de la ruta, así que el ownership no
+  depende de lo que envíe el cliente. Verificado en `hu007_ca03_theUpdateCannotReachAnotherAccount`.

@@ -2,7 +2,7 @@
 id: HU-025
 tipo: historia-de-usuario
 titulo: "Consultar agenda profesional"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-006-operacion-del-profesional]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento V — Operación clínica simulada"
@@ -54,13 +54,14 @@ Dado otro profesional, cuando intenta acceder a agenda ajena, entonces backend n
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | ProfessionalAgendaAndAuditTest.hu025_ca01_* | El profesional sale del token, nunca de un parámetro |
+| CA-02 | Cumplido | hu025_ca02_* | El profesional sale del token, nunca de un parámetro |
+| CA-03 | Cumplido | hu025_ca03_* (2) | El profesional sale del token, nunca de un parámetro |
+| DoD | Cumplido | 5 pruebas + agenda real en el portal médico | 4/4 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-02 — S4: CA verificados con pruebas automatizadas y UI conectada; estado `Completada`.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: conjunto exacto de atributos de USER visible a su profesional para la cita.

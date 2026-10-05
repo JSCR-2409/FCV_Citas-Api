@@ -19,7 +19,9 @@ public class SpecializedRequestAdminController {
 
   private final AppointmentStatusLog history;
 
-  public SpecializedRequestAdminController(JdbcTemplate db, AppointmentStatusLog history) { this.db = db; this.history = history; }
+  private final co.fcv.citas.integration.StatusChangeNotifier notifier;
+
+  public SpecializedRequestAdminController(JdbcTemplate db, AppointmentStatusLog history, co.fcv.citas.integration.StatusChangeNotifier notifier) { this.db = db; this.history = history; this.notifier = notifier; }
 
   /**
    * Lista solo las citas en REQUESTED, con los datos que HU-021 CA-03 exige para decidir:
@@ -113,6 +115,8 @@ public class SpecializedRequestAdminController {
     // HU-031: la decision administrativa se audita con su motivo. En el rechazo el motivo es
     // obligatorio por RN-04, de modo que el historial siempre explica por que se rechazo.
     history.record(id, d.status(), Long.parseLong(a.getName()), AppointmentStatusLog.SOURCE_ADMIN, d.reason());
+    // HU-033: cita especializada aprobada o rechazada, primer evento de WF-002.
+    notifier.publish("APPOINTMENT_DECIDED", id, d.status(), d.reason());
     return ResponseEntity.ok(Map.of("id", id, "status", d.status(), "reason", d.reason() == null ? "" : d.reason()));
   }
 
