@@ -75,8 +75,7 @@ Estado del backlog al 2026-10-04, tras cerrar el alcance de S2 a S6:
 
 | Estado | HU | Criterio |
 |---|---|---|
-| `Completada` | las 32 restantes | CA verificados con pruebas automatizadas y DoD cumplida, incluida la UI correspondiente |
-| `En validación` | HU-032, HU-034 | Workflow construido, validado y versionado; su CA-01 exige una ejecución contra una API alcanzable |
+| `Completada` | **las 34** | CA verificados con pruebas automatizadas y DoD cumplida, incluida la UI correspondiente |
 
 **Ninguna HU queda `Pendiente de aprobación`.** HU-001 a HU-005, el alcance de S2, estaban
 implementadas desde `f299ec9` sin evidencia registrada; se regularizaron al cerrar S6. Al hacerlo
@@ -107,12 +106,21 @@ HU-024, HU-029 y HU-030 pertenecen a S4, pero se abordaron en S3 al detectar que
 existía en ninguna capa. Cada una se validó con sus propias pruebas, conforme a la regla de
 `PLAN_AJUSTADO_S3_S5.md` de no fusionar las tres en un mismo bloque de verificación.
 
-### Por qué HU-032 y HU-034 no están completas
+### Cómo se cerraron HU-032 y HU-034
 
-Su CA-01 dice «cuando corre el workflow». Los dos workflows están construidos, validados y
-versionados, pero su nodo HTTP apunta a un marcador de posición: la instancia de n8n es en la nube y
-la API corre en `localhost:8080`, de modo que no hay forma de que una alcance a la otra sin exponer o
-desplegar el backend. Dar esos CA por cumplidos sería afirmar una evidencia que no existe.
+Su CA-01 dice «cuando corre el workflow», y durante un tiempo quedaron `En validación` porque la
+instancia de n8n es en la nube y la API corre en `localhost:8080`. Se cerraron abriendo un **túnel
+efímero** hacia la API, ejecutando los dos workflows contra datos reales y cerrándolo: el túnel estuvo
+abierto unos tres minutos y queda registrado en
+[`seguridad-contenido-no-confiable.md`](../../evidencia/seguridad-contenido-no-confiable.md), apartado
+4.6-bis.
 
-HU-033 sí está completa porque sus tres CA se verifican sin eso: el webhook se validó con tres
-ejecuciones controladas, una por rama.
+Ninguno de los dos CA-01 exige enviar correo: hablan de **seleccionar** y de **agregar**. Por eso la
+ausencia de credencial de Gmail no los bloqueaba, y por eso las copias de prueba omitieron el nodo
+Gmail: no participa en lo que el criterio pide.
+
+El cierre del túnel se aprovechó para probar el requisito de WF-001 de «manejar API no disponible»,
+que de otro modo se habría quedado sin evidencia: tres reintentos y `API_UNAVAILABLE`.
+
+**Lo único que sigue sin probarse es el envío de un correo**, que depende de la credencial de Google
+Cloud de cada estudiante.

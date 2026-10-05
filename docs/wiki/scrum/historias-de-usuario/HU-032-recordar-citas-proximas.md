@@ -2,7 +2,7 @@
 id: HU-032
 tipo: historia-de-usuario
 titulo: "Recordar citas próximas"
-estado: En validación
+estado: Completada
 epica: "[[EP-008-automatizaciones-posteriores]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento VI — Automatizaciones posteriores"
@@ -54,14 +54,31 @@ Dado una ejecución, cuando finaliza, entonces no cambia estado, reserva ni regl
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Parcial | `IntegrationEndpointsTest.ca01_*` (4) verifican la selección en el backend | Falta ejecutar WF-001 contra una API alcanzable |
+| CA-01 | Cumplido | Ejecución 9 contra la API real: 2 citas `APPROVED` seleccionadas con `selectedForReminder` | Más `IntegrationEndpointsTest.ca01_*` (4) |
 | CA-02 | Cumplido | `WF-001-appointment-reminders.json`, JSON válido y sin credenciales | Verificado con grep |
 | CA-03 | Cumplido | `IntegrationEndpointsTest.ca03_*` (2): el endpoint es de solo lectura | No existe ningún método de escritura |
-| DoD | Parcial | 3/4: falta la evidencia de ejecución de CA-01 | Ver riesgos residuales 4.6 y 4.7 |
+| DoD | Cumplido | 4/4 | Ejecutado contra la API real por un túnel efímero, ya cerrado |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
-- 2026-10-04 — S5: WF-001 construido, validado y versionado. CA-01 pendiente de ejecucion real; estado `En validación`.
+- 2026-10-04 — S5: WF-001 construido, validado y versionado; CA-01 pendiente de ejecucion real.
+- 2026-10-04 — Cierre: ejecutado contra la API real a traves de un tunel efimero. CA-01 cumplido; estado `Completada`.
 
 ## Notas y decisiones
-- PREGUNTA ABIERTA: ventana de “próxima”, contenido del recordatorio y manejo de citas canceladas.
+
+- ~~PREGUNTA ABIERTA: ventana de “próxima”, contenido del recordatorio y manejo de citas canceladas.~~
+  **Resuelta el 2026-10-04.**
+
+- **DECISIÓN — ventana.** Parametrica, 24 horas por defecto y acotada a 14 dias. Vive en el contrato y
+  no en el workflow, de modo que cambiarla no exige reeditar el JSON.
+
+- **DECISIÓN — citas canceladas y rechazadas.** No llegan nunca: el endpoint filtra por
+  `status = APPROVED`, de modo que la exclusion es por codigo de estado y no por ausencia de
+  cancelacion. Verificado en `ca01_cancelledAndRejectedAppointmentsAreNeverReminded`.
+
+- **DECISIÓN — contenido.** Especialidad, profesional, fecha y hora, duracion y sede con su
+  direccion. Sin numero de documento ni telefono: el recordatorio se envia por correo y no necesita
+  mas.
+
+- **DECISIÓN — antiduplicados.** Ventanas consecutivas no solapadas, por disparo diario a la misma
+  hora, mas `misfirePolicy: skip` para que una ejecucion perdida no reenvie una ventana ya cubierta.

@@ -35,6 +35,8 @@ app:
     # HU-032 y HU-033. Sin valores por defecto: si no estan definidos, los endpoints de integracion
     # quedan cerrados y el webhook de salida no intenta ningun envio. Un token por defecto
     # versionado seria un token conocido.
+    # Admite varios valores separados por coma durante una rotacion: el primero es el vigente y los
+    # siguientes son los que se estan retirando, de modo que cambiarlo no interrumpe la automatizacion.
     token: ${INTEGRATION_TOKEN:}
     status-webhook-url: ${STATUS_WEBHOOK_URL:}
     webhook-secret: ${STATUS_WEBHOOK_SECRET:}

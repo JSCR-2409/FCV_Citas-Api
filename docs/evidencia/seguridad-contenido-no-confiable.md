@@ -111,11 +111,30 @@ Estas no son medidas añadidas al final: son la razón por la que la integració
 Esto es lo que **no** está resuelto. Se declara porque un inventario de defensas sin un inventario de
 huecos es propaganda.
 
-### 4.1 El token de integración es estático y no rota
+### 4.1 ~~El token de integración es estático y no rota~~ — RESUELTO
 
-No caduca ni se renueva. Si se filtra, da acceso de lectura a los datos de citas de la ventana
-consultable hasta que alguien lo cambie a mano. **Mitigación parcial:** es de solo lectura y de
-alcance acotado. **Lo que falta:** rotación, caducidad y registro de uso.
+El token **sigue siendo fijo**, y eso es deliberado. Lo que se arregló es lo que realmente dolía.
+
+El problema de un token fijo no es su duración: es que **cambiarlo obligaba a elegir** entre dejar la
+automatización caída un rato o no cambiarlo nunca. Ahora `app.integrations.token` admite varios
+valores separados por coma: el primero es el vigente y los siguientes son los que se están retirando.
+La rotación queda sin interrupción —se pone el nuevo delante, se actualiza la credencial en n8n, y
+cuando el log deja de avisar del viejo se borra del valor.
+
+Y un token filtrado antes **no dejaba ningún rastro**. Ahora cada uso correcto se registra con su IP:
+`INFO` para el vigente y `WARN` para uno en retirada, que además recuerda terminar la rotación. El
+volumen esperado son un par de peticiones al día, así que el log es legible y un uso inesperado se
+nota.
+
+**Lo que se descartó, y por qué.** Una tabla de tokens con revocación individual es la respuesta de
+manual, pero hay **un único consumidor**: una migración, un endpoint y una pantalla para administrar
+una sola credencial es coste sin beneficio. Y una caducidad fija empeora las cosas: un token que
+expira solo rompe una automatización desatendida en un momento que nadie eligió.
+
+**Probado sobre una filtración real.** Para cerrar HU-032 y HU-034 hubo que escribir un token en un
+workflow de n8n. Se usó uno desechable y después se ejecutó el procedimiento completo: nuevo token
+delante, verificación de que los dos valían, y retirada del desechable. El desechable pasó a devolver
+`403` y el vigente siguió en `200`, sin ninguna interrupción.
 
 ### 4.2 ~~La firma HMAC se emite pero nadie la verifica~~ — RESUELTO
 
@@ -179,6 +198,21 @@ componente.
 habilitado solo en el stack de laboratorio, pero **es una decisión de configuración, no una barrera
 de código**: si alguien lo habilitara en un entorno real, cualquiera que conozca un correo registrado
 podría tomar la cuenta.
+
+### 4.6-bis Se expuso la API por un túnel efímero, y se cerró
+
+Para cerrar HU-032 y HU-034 hacía falta que n8n alcanzase la API. Se abrió un túnel de Cloudflare
+(`trycloudflare.com`, sin cuenta), se ejecutaron los dos workflows contra la API real, y se cerró. El
+túnel estuvo abierto unos tres minutos.
+
+Lo que redujo el riesgo mientras estuvo abierto: los endpoints de integración exigían el token, el
+resto exigía JWT, el límite de peticiones estaba activo y los datos son sintéticos de laboratorio. Lo
+que quedó como rastro: el token desechable que se escribió en el workflow de prueba, retirado después
+por el procedimiento de rotación descrito en 4.1.
+
+Confirmación del cierre: la URL del túnel devuelve `530`, que es lo que Cloudflare responde cuando no
+hay origen, y no queda ningún proceso `cloudflared`. Las dos copias temporales de workflow están
+archivadas.
 
 ### 4.6 n8n no puede alcanzar el backend local, pero el backend sí alcanza n8n
 

@@ -150,14 +150,42 @@ había que demostrar:
 Los datos de esa verificación se eliminaron después: 16 usuarios, 8 citas y 4 entradas de historial,
 los mismos valores que antes de empezar.
 
+## Cierre de HU-032 y HU-034 contra la API real
+
+Los dos CA-01 pendientes exigían que **el workflow corriese**: «cuando corre el workflow, entonces se
+selecciona para recordatorio» y «…entonces produce conteos agrupados por sede y estado». Ninguno habla
+de enviar, de modo que la credencial de Gmail no era el bloqueo: lo era que n8n alcanzase la API.
+
+Se abrió un túnel de Cloudflare hacia `localhost:8080`, se ejecutaron dos copias temporales de los
+workflows —con el nodo Gmail omitido, porque no participa en lo que el CA pide— y se cerró el túnel.
+
+| Ejecución | Workflow | Resultado inspeccionado |
+|---|---|---|
+| `9` | Copia de WF-001 | 2 citas `APPROVED` de la ventana, divididas en 2 ítems, cada una con `selectedForReminder: true` |
+| `10` | Copia de WF-003 | `total: 2`, `bySite: {HIC: 2}`, `byStatus: {APPROVED: 2}`, y la distribución por especialidad |
+| `11` | Copia de WF-001, **con el túnel ya cerrado** | 3 reintentos en 11 s y `outcome: API_UNAVAILABLE` |
+
+La ejecución 11 no estaba planeada: el cierre del túnel se aprovechó para probar el requisito de WF-001
+de «manejar API no disponible», que de otro modo se habría quedado sin evidencia.
+
+Las dos copias temporales están archivadas. El entregable sigue siendo el JSON versionado, cuyo nodo
+HTTP apunta a un marcador de posición: el túnel era efímero y fijarlo en el JSON sería versionar una
+URL muerta.
+
+**El token que se usó en las copias era desechable**, y se retiró después por el procedimiento de
+rotación. Escribir un token en un workflow de n8n lo deja en su base de datos, así que el que tocó esas
+copias no podía seguir siendo válido.
+
 ## Lo que esta evidencia no demuestra
 
-- Que llegue un correo. Falta la credencial de Gmail OAuth2, que cada estudiante crea con su propia
-  cuenta de Google Cloud.
-- Que WF-001 y WF-003 se ejecuten contra datos reales: su nodo HTTP apunta a un marcador de posición
-  que hay que sustituir por la URL pública de la API, y n8n no alcanza `localhost`.
+- **Que llegue un correo.** Es lo único que queda sin probar. Falta la credencial de Gmail OAuth2, que
+  cada estudiante crea con su propia cuenta de Google Cloud y que no puede crearse desde el agente.
+- **Que los tres workflows versionados funcionen tal cual están.** Su nodo HTTP apunta a un marcador de
+  posición, porque el túnel era efímero y fijar su URL sería versionar una dirección muerta. Para
+  usarlos hay que poner la URL del despliegue.
 
-Los dos puntos son de despliegue y de credenciales, no de construcción de los workflows.
+Los dos puntos son de despliegue y de credenciales, no de construcción ni de lógica de los workflows:
+esa parte **sí** está ejecutada contra la API real.
 
 ## Privilegio mínimo de las credenciales
 

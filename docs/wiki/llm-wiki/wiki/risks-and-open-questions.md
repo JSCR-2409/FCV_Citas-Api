@@ -166,7 +166,35 @@ especializadas. Ahora el selector se puebla del catálogo y el endpoint lo decid
 
 De paso, el selector de sede dejó de ser decorativo: su valor llega a la consulta de disponibilidad.
 
-## VIGENTE — El token de integración sigue siendo estático
+## RESUELTO — El token de integración es fijo y, ahora sí, rotable
 
-Es el único de los riesgos técnicos que queda abierto, y necesita una decisión de diseño: caducidad
-fija, o varios tokens con revocación individual. Ver `docs/evidencia/seguridad-contenido-no-confiable.md`.
+La decisión: **sigue fijo**, pero `app.integrations.token` admite varios valores separados por coma, el
+primero vigente y los siguientes en retirada. El problema de un token fijo no era su duración sino que
+cambiarlo obligaba a elegir entre dejar la automatización caída o no cambiarlo nunca. Cada uso correcto
+se registra con su IP: antes un token filtrado no dejaba ningún rastro.
+
+Descartadas una tabla de tokens con revocación individual, porque hay un único consumidor, y una
+caducidad fija, porque un token que expira solo rompe una automatización desatendida en un momento que
+nadie eligió.
+
+Probado sobre una filtración real: el token que hubo que escribir en los workflows de prueba se retiró
+sin interrupción.
+
+## RESUELTO — n8n no alcanzaba el backend local
+
+Se cerró con un túnel efímero de unos tres minutos, usado solo para ejecutar WF-001 y WF-003 contra
+datos reales. HU-032 y HU-034 pasaron a `Completada`, y el backlog quedó con **las 34 HU completas**.
+
+Los dos CA-01 hablan de **seleccionar** y de **agregar**, no de enviar, así que la credencial de Gmail
+nunca los bloqueaba. Lo único que sigue sin probarse es el envío real de correo, que depende de la
+credencial de Google Cloud de cada estudiante.
+
+## VIGENTE — Lo que queda realmente abierto
+
+| Asunto | Por qué sigue abierto |
+|---|---|
+| El canal del token de recuperación es de laboratorio | Admitido por RF-03; es configuración, no barrera de código |
+| Sin credencial de Gmail en la instancia | La crea cada estudiante con su cuenta de Google Cloud |
+| El `401` frente al `403` del contrato de catálogos | Exige decidir si se corrige el contrato o la configuración |
+| El `400` frente al `403` en sede no asignada | HU-015 CA-02 no fija el código |
+| Semántica de concurrencia en la retención de franjas | Falta decidir si se requiere reserva temporal explícita |

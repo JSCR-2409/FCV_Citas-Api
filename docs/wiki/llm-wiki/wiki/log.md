@@ -206,3 +206,36 @@ que enviaba cualquier general distinta de la primera al endpoint de especializad
 sede deja de ser decorativo.
 
 **HECHO:** Suite de 168 a 173 pruebas de backend.
+
+## 2026-10-04 — Cierre de HU-032 y HU-034, y rotacion del token
+
+**HECHO:** Los dos CA-01 pendientes hablan de **seleccionar** y de **agregar**, no de enviar, de modo
+que la credencial de Gmail no era el bloqueo: lo era que n8n alcanzase la API. Se abrio un tunel
+efimero de Cloudflare, se ejecutaron copias temporales de WF-001 y WF-003 contra datos reales, y se
+cerro. El tunel estuvo abierto unos tres minutos.
+
+**HECHO:** Ejecucion 9, copia de WF-001: dos citas APPROVED de la ventana divididas en items, cada una
+con `selectedForReminder`. Ejecucion 10, copia de WF-003: conteos por sede, estado y especialidad.
+
+**HECHO:** El cierre del tunel se aprovecho para probar el requisito de WF-001 de manejar API no
+disponible: tres reintentos en once segundos y `API_UNAVAILABLE`. Esa evidencia no estaba planeada y
+de otro modo se habria quedado sin cubrir.
+
+**DECISION — el token de integracion sigue fijo, pero deja de ser irrotable.**
+`app.integrations.token` admite varios valores separados por coma: el primero vigente, los siguientes
+en retirada. El problema de un token fijo no era su duracion sino que cambiarlo obligaba a elegir
+entre dejar la automatizacion caida o no cambiarlo nunca.
+
+Se descarto una tabla de tokens con revocacion individual porque hay un unico consumidor: una
+migracion, un endpoint y una pantalla para una sola credencial es coste sin beneficio. Y se descarto
+una caducidad fija porque un token que expira solo rompe una automatizacion desatendida en un momento
+que nadie eligio.
+
+**HECHO:** Cada uso correcto se registra con su IP, `INFO` para el vigente y `WARN` para uno en
+retirada. Un token filtrado antes no dejaba ningun rastro.
+
+**HECHO:** El procedimiento se probo sobre una filtracion real: el token escrito en los workflows de
+prueba se retiro poniendo el nuevo delante, verificando que los dos valian, y borrandolo. El
+desechable paso a `403` y el vigente siguio en `200`, sin interrupcion.
+
+**HECHO:** Backlog: **las 34 HU en `Completada`**. Suite de 177 pruebas de backend.

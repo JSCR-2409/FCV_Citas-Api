@@ -9,9 +9,9 @@ instancia del trainer. **Ninguno lleva credenciales**, y los tres quedan **inact
 
 | JSON | HU | Nodos | Disparador | Estado HU |
 |---|---|---|---|---|
-| `WF-001-appointment-reminders.json` | HU-032 | 7 | Schedule diario 08:00 | `En validación` |
+| `WF-001-appointment-reminders.json` | HU-032 | 7 | Schedule diario 08:00 | `Completada` |
 | `WF-002-status-notifications.json` | HU-033 | 12 | Webhook desde `citas-api` | `Completada` |
-| `WF-003-daily-operational-summary.json` | HU-034 | 6 | Schedule diario 19:00 | `En validación` |
+| `WF-003-daily-operational-summary.json` | HU-034 | 6 | Schedule diario 19:00 | `Completada` |
 
 ## DECISIÓN — Autenticación de las automatizaciones
 
@@ -78,10 +78,23 @@ improvisado.
 Tres ejecuciones de WF-002, una por rama, con datos sintéticos. Las dos de rechazo son las que
 importan: demuestran que un payload incompleto y un evento desconocido no generan correo.
 
-## PREGUNTA ABIERTA — La cadena completa no se ejecutó
+## HECHO — La logica se ejecuto contra la API real
 
-n8n está en la nube y la API en `localhost:8080`. Por eso HU-032 y HU-034 quedan `En validación`: su
-CA-01 dice «cuando corre el workflow». Ver `risks-and-open-questions.md`.
+HU-032 y HU-034 se cerraron abriendo un tunel efimero hacia la API, ejecutando copias temporales de
+WF-001 y WF-003 contra datos reales, y cerrandolo. Sus CA-01 hablan de **seleccionar** y de
+**agregar**, no de enviar, de modo que la credencial de Gmail no los bloqueaba.
+
+Lo unico que sigue sin probarse es el **envio de un correo**, que depende de la credencial de Google
+Cloud de cada estudiante.
+
+## DECISIÓN — El token de integracion es fijo y rotable
+
+Admite varios valores separados por coma: el primero vigente, los siguientes en retirada. El problema
+de un token fijo no era su duracion sino que cambiarlo obligaba a elegir entre dejar la automatizacion
+caida o no cambiarlo nunca. Cada uso se registra con su IP.
+
+Se descarto una tabla de tokens con revocacion individual: hay un unico consumidor. Y una caducidad
+fija, porque un token que expira solo rompe una automatizacion desatendida cuando nadie lo eligio.
 
 ## Fuentes
 
