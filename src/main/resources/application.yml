@@ -38,3 +38,8 @@ app:
     token: ${INTEGRATION_TOKEN:}
     status-webhook-url: ${STATUS_WEBHOOK_URL:}
     webhook-secret: ${STATUS_WEBHOOK_SECRET:}
+  rate-limit:
+    # Peticiones por minuto y por IP. La recuperacion de contrasena es mas estricta porque una
+    # persona la usa una vez; la integracion la consume un workflow con un ritmo previsible.
+    recovery-per-minute: ${RATE_LIMIT_RECOVERY:5}
+    integration-per-minute: ${RATE_LIMIT_INTEGRATION:60}

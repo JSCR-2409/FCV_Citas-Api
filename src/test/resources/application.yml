@@ -13,3 +13,8 @@ app.jwt.refresh-days: 7
 # HU-006. Las pruebas necesitan el token para verificar el consumo de un solo uso y el rechazo del
 # token vencido; es el mismo canal controlado que usa el entorno de laboratorio.
 app.recovery.expose-token: true
+# El limite de peticiones se eleva en pruebas: las suites hacen decenas de llamadas por minuto
+# desde la misma IP, y el 429 escondería el comportamiento que se quiere verificar. El limite se
+# prueba aparte, en RateLimitTest, con su propio valor.
+app.rate-limit.recovery-per-minute: 1000
+app.rate-limit.integration-per-minute: 1000

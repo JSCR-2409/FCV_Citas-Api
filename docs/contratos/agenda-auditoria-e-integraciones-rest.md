@@ -129,8 +129,20 @@ Cuando `STATUS_WEBHOOK_URL` está configurada, el backend hace `POST` a esa URL 
 | `APPOINTMENT_CANCELLED` | el paciente cancela su cita |
 
 El payload lleva `event`, `appointmentId`, `status`, `startAt`, `patientName`, `patientEmail`,
-`professionalName`, `specialtyName`, `locationName` y `reason`, y va firmado con HMAC-SHA256 en
-`X-Signature` usando `STATUS_WEBHOOK_SECRET`.
+`professionalName`, `specialtyName`, `locationName` y `reason`.
+
+**Autenticación: JWT de dos minutos.** La petición lleva `Authorization: Bearer <jwt>`, HS256 firmado
+con `STATUS_WEBHOOK_SECRET`, con `iss=citas-api`, `sub=status-webhook` y `exp` a 120 segundos. n8n lo
+verifica de forma nativa con la autenticación JWT del nodo Webhook, de modo que el secreto vive en una
+credencial de n8n y no en el JSON versionado.
+
+Antes se enviaba un HMAC-SHA256 del cuerpo en `X-Signature` y se retiró, porque **nadie lo
+verificaba**: comprobarlo en n8n exigiría que un nodo Code tuviera el secreto, y eso lo dejaría dentro
+del JSON. Una firma que nadie verifica no es una defensa.
+
+**El secreto debe tener al menos 32 caracteres.** Si la URL está configurada y el secreto es más
+corto, el notificador queda **desactivado** y lo registra con un `ERROR` al arrancar. Enviar el evento
+sin firmar sería peor que no enviarlo.
 
 Tres propiedades del envío, todas por la misma razón —una automatización de notificación no puede
 influir en la operación clínica—:
@@ -142,8 +154,22 @@ influir en la operación clínica—:
 
 La URL del webhook **nunca se registra en el log**: puede llevar un identificador secreto en la ruta.
 
-**Riesgo residual:** la firma se emite pero WF-002 todavía no la verifica; se apoya en el Header Auth
-del webhook. Registrado en `docs/evidencia/seguridad-contenido-no-confiable.md`.
+## Límite de peticiones
+
+Dos rutas tienen cupo por IP, con `429` y `Retry-After` cuando se agota:
+
+| Ruta | Cupo por minuto | Propiedad |
+|---|---|---|
+| `/api/auth/recovery/**` | 5 | `app.rate-limit.recovery-per-minute` |
+| `/api/v1/integrations/**` | 60 | `app.rate-limit.integration-per-minute` |
+
+Son las dos abusables sin estar autenticado o con una sola credencial: la recuperación permite generar
+tokens en cantidad, y pedir uno nuevo invalida el anterior, de modo que sin límite cualquiera podría
+invalidar de forma repetida el token legítimo de otra persona; la integración permite probar el token
+de servicio en bucle.
+
+El filtro se ejecuta **antes de Spring Security**, para que el `403` de un token inválido no se adelante
+al contador. El resto de la API no está limitada.
 
 ## Evidencia cross-repo
 

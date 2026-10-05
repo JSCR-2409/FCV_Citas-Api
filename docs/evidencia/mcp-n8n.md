@@ -41,7 +41,7 @@ del cliente. Por eso ningún workflow quedó activado.
 | Workflow | Id en la instancia | Nodos | Estado |
 |---|---|---|---|
 | WF-001 Recordatorio de citas próximas | `Q8qFh3h5DUuJl3cd` | 7 | Inactivo |
-| WF-002 Notificación por cambio de estado | `zjNkNjCTPFGUJE0J` | 12 | Inactivo |
+| WF-002 Notificación por cambio de estado | `jXf6VHbClSexkS1g` | 12 | Inactivo |
 | WF-003 Resumen operativo diario | `ffrxhi4R8ZqeRzJq` | 6 | Inactivo |
 
 Los tres quedan **inactivos a propósito**. S6 lo dice de forma literal: «No activar un flujo sin
@@ -74,22 +74,55 @@ lugar de dar por bueno un `201`.
 
 ## Ejecución controlada de WF-002
 
-Tres ejecuciones, una por rama, para comprobar que el enrutado y la respuesta son deterministas.
-Todas con datos sintéticos.
+### Una corrección sobre el primer intento
 
-| Ejecución | Entrada | Rama esperada | Resultado |
-|---|---|---|---|
-| `1` | `APPOINTMENT_CANCELLED` completo | Correo de cancelación → Trazabilidad → 200 | `success` |
-| `2` | `APPOINTMENT_DECIDED` sin `appointmentId` ni `patientEmail` | Responder 400 | `success` |
-| `3` | `EVENTO_INVENTADO` con payload válido | Responder 422 | `success` |
+Las tres primeras ejecuciones se lanzaron pasando el cuerpo en `inputs.webhookData.body` con
+`pinData: {}`, que es la forma que documenta la propia herramienta. **El cuerpo nunca llegó.** Lo
+descubrí al inspeccionar los datos de una ejecución posterior: el nodo Webhook había emitido `{}`, de
+modo que las tres cayeron por la rama del payload incompleto.
 
-`success` en las tres significa que el workflow **terminó según su diseño**, no que enviara un
-correo. En la ejecución 1 el nodo Gmail no tenía credencial y, por su `continueRegularOutput`, la
-cadena continuó hasta la respuesta. Eso es justo lo que se quería verificar: un fallo de envío deja
-traza y responde, en lugar de dejar al backend esperando.
+Yo había registrado que la ejecución 1 enrutaba a la rama de cancelación y la 3 al `422`. **Eso era
+falso**: solo el `400` resultó cierto, y por casualidad. El error de fondo fue mío: di por buena una
+ejecución `success` sin mirar los datos, cuando `success` solo dice que el workflow terminó según su
+diseño, y un payload vacío por la rama de rechazo también termina según su diseño.
 
-Las ejecuciones 2 y 3 son las que importan más, porque demuestran que **el workflow dice «no»**: un
-payload incompleto y un evento desconocido no producen correo.
+La forma que sí funciona es pasar el item completo del webhook en `pinData`, con sus claves
+`headers`, `params`, `query` y `body`.
+
+### Las cuatro ramas, con datos inspeccionados
+
+| Ejecución | Entrada | Salida del Switch | Nodo final | Verificado |
+|---|---|---|---|---|
+| `5` | `APPOINTMENT_CANCELLED` + marcado HTML | 2 | Correo de cancelación → Trazabilidad → Responder 200 | sí |
+| `6` | `APPOINTMENT_DECIDED` completo | 0 | Correo de solicitud resuelta → Trazabilidad → Responder 200 | sí |
+| `7` | `EVENTO_INVENTADO` completo | 3 | Responder 422 | sí |
+| `8` | `APPOINTMENT_DECIDED` sin `appointmentId` ni `patientEmail` | — | Responder 400 | sí |
+
+«Verificado» significa que leí `runData` y comprobé el índice de salida del Switch y el
+`lastNodeExecuted`, no solo el estado de la ejecución.
+
+Las dos últimas son las que más importan: demuestran que **el workflow dice «no»**. Un payload
+incompleto y un evento desconocido no producen correo.
+
+### El escapado, comprobado con una carga hostil
+
+La ejecución 5 envió deliberadamente marcado en los campos de texto. La salida del nodo
+`Normalizar y escapar`:
+
+| Campo | Entrada | Salida |
+|---|---|---|
+| `patientName` | `Ana <b>Perez</b> & Cia` | `Ana &lt;b&gt;Perez&lt;/b&gt; &amp; Cia` |
+| `professionalName` | `Doctora "Prueba"` | `Doctora &quot;Prueba&quot;` |
+| `reason` | `<script>alert(1)</script>` | `&lt;script&gt;alert(1)&lt;/script&gt;` |
+| `patientEmail` | `paciente.laboratorio@example.test` | sin cambios, **a propósito** |
+
+El correo del destinatario no se escapa porque va al campo `sendTo` y no al cuerpo HTML; escaparlo lo
+convertiría en una dirección inválida.
+
+En esa misma ejecución el nodo Gmail devolvió `Node does not have any credentials set` y, por su
+`continueRegularOutput`, la cadena siguió hasta la respuesta con `outcome: NOT_SENT`. Es lo que se
+quería ver: un fallo de envío deja traza y responde, en lugar de dejar al backend esperando, y la
+traza **no miente** sobre si el correo salió.
 
 ## Verificación en vivo del webhook de salida
 
@@ -133,7 +166,7 @@ Las tres credenciales que hay que crear, con lo que debe poder cada una:
 | Credencial | Alcance mínimo razonable |
 |---|---|
 | Token de integración (cabecera) | Solo `/api/v1/integrations/**`, solo lectura. No abre nada administrativo |
-| Header Auth entrante del webhook | Solo permite entregar eventos a WF-002. No lee nada |
+| JWT Auth entrante del webhook | Solo permite entregar eventos a WF-002. No lee nada. HS256, verificado por n8n |
 | Gmail OAuth2 | Solo el envío (`gmail.send`). No requiere lectura del buzón |
 
 Ninguna forma parte de los JSON versionados. Comprobado: `grep` de bloques de credenciales sobre los

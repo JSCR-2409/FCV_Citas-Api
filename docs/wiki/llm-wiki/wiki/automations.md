@@ -40,6 +40,23 @@ La ventana es de 24 horas y el disparo es diario a la misma hora, de modo que la
 consecutivas no se solapan y ninguna cita entra en dos. `misfirePolicy: skip` evita que una ejecución
 perdida reenvíe una ventana ya cubierta.
 
+## DECISIÓN — El webhook se autentica con un JWT que n8n verifica
+
+El backend emite un JWT HS256 de dos minutos en `Authorization: Bearer`, firmado con
+`STATUS_WEBHOOK_SECRET`, y n8n lo verifica de forma nativa con el secreto guardado como credencial.
+
+Antes se enviaba un HMAC del cuerpo en `X-Signature` que **nadie comprobaba**: verificarlo exigiria
+que un nodo Code tuviera el secreto, y meterlo ahi lo dejaria dentro del JSON versionado. Una firma
+que nadie verifica es decoracion, no defensa.
+
+Si el secreto tiene menos de 32 caracteres, HS256 no puede firmar: el notificador queda desactivado y
+lo dice con un `ERROR` al arrancar, en lugar de fallar en cada evento.
+
+## DECISIÓN — El contenido del correo va escapado
+
+Un solo nodo, `Normalizar y escapar`, convierte a entidades HTML los campos que van al cuerpo. El
+correo del destinatario no se escapa porque va al campo `sendTo`, no al HTML.
+
 ## DECISIÓN — El webhook de salida no puede influir en la operación
 
 Tres propiedades, todas por la misma razón:

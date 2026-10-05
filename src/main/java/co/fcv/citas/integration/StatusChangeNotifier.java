@@ -34,9 +34,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *       instancia externa.
  * </ol>
  *
- * <p>El payload va firmado con HMAC-SHA256 en {@code X-Signature} para que el workflow pueda
- * comprobar que viene de este backend. Sin firma, cualquiera que conozca la URL del webhook podria
- * provocar correos a nombre de la institucion.
+ * <p>La peticion va autenticada con un JWT de vida corta en {@code Authorization: Bearer}, firmado
+ * HS256 con {@code app.integrations.webhook-secret}. n8n lo verifica de forma nativa con su
+ * autenticacion JWT del nodo Webhook, de modo que el secreto vive en una credencial de n8n y no en
+ * el JSON versionado.
+ *
+ * <p>Antes se enviaba un HMAC-SHA256 del cuerpo en {@code X-Signature}, y se retiro porque
+ * <b>nadie lo verificaba</b>: un nodo Code necesitaria el secreto para comprobarlo, y meterlo ahi lo
+ * dejaria dentro del JSON. Una firma que nadie comprueba no es una defensa, es decoracion. El JWT
+ * cubre lo que importa: sin el secreto no se puede construir una peticion valida, y el {@code exp}
+ * limita la ventana de reutilizacion.
  */
 @Component
 public class StatusChangeNotifier {
@@ -55,14 +62,34 @@ public class StatusChangeNotifier {
     return thread;
   });
 
+  /** HS256 exige una clave de 256 bits: un secreto mas corto hace fallar la firma. */
+  private static final int MIN_SECRET_LENGTH = 32;
+
   public StatusChangeNotifier(JdbcTemplate db, ObjectMapper json,
                               org.springframework.core.env.Environment env) {
     this.db = db;
     this.json = json;
-    this.webhookUrl = env.getProperty("app.integrations.status-webhook-url", "");
-    this.signingSecret = env.getProperty("app.integrations.webhook-secret", "");
+    String url = env.getProperty("app.integrations.status-webhook-url", "");
+    String secret = env.getProperty("app.integrations.webhook-secret", "");
+
+    // La configuracion se valida una vez al arrancar y no en cada evento. Antes un secreto corto
+    // lanzaba WeakKeyException por cada notificacion, de modo que el webhook no funcionaba nunca y
+    // lo unico que lo delataba era un aviso por cita. Un error de configuracion debe verse al
+    // arrancar.
+    if (!url.isBlank() && secret.length() < MIN_SECRET_LENGTH) {
+      log.error("Webhook de estados DESACTIVADO: app.integrations.webhook-secret tiene {} caracteres"
+          + " y HS256 necesita al menos {}. Configure un secreto mas largo.",
+          secret.length(), MIN_SECRET_LENGTH);
+      url = "";
+    }
+    this.webhookUrl = url;
+    this.signingSecret = secret;
   }
 
+  /**
+   * Solo esta activo con URL y con un secreto utilizable. Enviar el evento sin firmar seria peor que
+   * no enviarlo: cualquiera que conozca la URL podria provocar correos a nombre de la institucion.
+   */
   public boolean enabled() { return !webhookUrl.isBlank(); }
 
   /**
@@ -120,7 +147,7 @@ public class StatusChangeNotifier {
       var builder = HttpRequest.newBuilder(URI.create(webhookUrl))
           .timeout(Duration.ofSeconds(10))
           .header("Content-Type", "application/json");
-      if (!signingSecret.isBlank()) builder.header("X-Signature", sign(body));
+      if (!signingSecret.isBlank()) builder.header("Authorization", "Bearer " + bearer());
       HttpResponse<String> response = http.send(builder.POST(
           HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8)).build(),
           HttpResponse.BodyHandlers.ofString());
@@ -137,14 +164,20 @@ public class StatusChangeNotifier {
     }
   }
 
-  private String sign(String body) {
-    try {
-      var mac = javax.crypto.Mac.getInstance("HmacSHA256");
-      mac.init(new javax.crypto.spec.SecretKeySpec(
-          signingSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-      return java.util.HexFormat.of().formatHex(mac.doFinal(body.getBytes(StandardCharsets.UTF_8)));
-    } catch (Exception e) {
-      throw new IllegalStateException("no se pudo firmar el evento", e);
-    }
+  /**
+   * JWT de dos minutos para autenticar la llamada al webhook. Dos minutos y no quince: el evento se
+   * entrega de inmediato, asi que una ventana larga solo amplia el margen de reutilizacion si el
+   * token se capturase.
+   */
+  private String bearer() {
+    var now = java.time.Instant.now();
+    return io.jsonwebtoken.Jwts.builder()
+        .issuer("citas-api")
+        .subject("status-webhook")
+        .issuedAt(java.util.Date.from(now))
+        .expiration(java.util.Date.from(now.plusSeconds(120)))
+        .signWith(io.jsonwebtoken.security.Keys.hmacShaKeyFor(
+            signingSecret.getBytes(StandardCharsets.UTF_8)))
+        .compact();
   }
 }

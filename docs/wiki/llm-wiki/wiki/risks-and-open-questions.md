@@ -121,3 +121,52 @@ no puede hacerse desde el agente. Sin ella, ningún nodo Gmail de los tres workf
 
 El análisis completo de contenido no confiable y los ocho riesgos residuales están en
 `docs/evidencia/seguridad-contenido-no-confiable.md`.
+
+---
+
+# Riesgos cerrados en el repaso posterior a S6 — 2026-10-04
+
+## RESUELTO — La firma HMAC que nadie verificaba
+
+No se resolvió verificando el HMAC, sino **cambiando el mecanismo**. Comprobar un HMAC en n8n exige
+que un nodo Code tenga el secreto, y meterlo ahí lo dejaría dentro del JSON versionado: la defensa se
+habría pagado rompiendo la regla de no versionar credenciales.
+
+El webhook pasa a la autenticación **JWT nativa** de n8n. El backend emite un token HS256 de dos
+minutos y n8n verifica firma y `exp` por sí mismo, con el secreto como credencial. El `X-Signature` se
+retiró. No deja hueco: sin el secreto no se puede construir ninguna petición válida, y la integridad
+del cuerpo en tránsito la cubre TLS.
+
+## RESUELTO — El contenido del correo no estaba escapado
+
+Un solo nodo escapa a entidades HTML los campos que van al cuerpo. Verificado con una carga hostil:
+`<script>alert(1)</script>` sale como `&lt;script&gt;alert(1)&lt;/script&gt;`. El destinatario no se
+escapa porque va al campo `sendTo`.
+
+## RESUELTO — Sin límite de peticiones
+
+`RateLimitFilter`: 5 por minuto en recuperación y 60 en integración, por IP, con `429` y
+`Retry-After`. Se registra **por delante de Spring Security**; en la primera versión iba después y el
+`403` de un token inválido se adelantaba al contador, de modo que el límite no frenaba precisamente el
+abuso que debe cortar.
+
+## RESUELTO — Un secreto corto desactivaba el webhook en silencio
+
+HS256 exige 256 bits. Con un secreto más corto, cada notificación lanzaba `WeakKeyException` y el
+webhook no funcionaba nunca; lo único que lo delataba era un aviso por cita. Ahora la longitud se
+valida al arrancar y el notificador queda desactivado con un `ERROR` explícito.
+
+## RESUELTO — El mapa de especialidades codificado en el frontend
+
+El formulario de reserva traducía nombres a identificadores con un objeto literal y nunca consultaba
+`/catalogs/specialties`. Tres consecuencias: una especialidad nueva del ADMIN no se podía reservar, un
+cambio de identificadores reservaba la especialidad equivocada en silencio, y la condición
+`specialtyId === 1` enviaba cualquier especialidad general distinta de la primera al endpoint de
+especializadas. Ahora el selector se puebla del catálogo y el endpoint lo decide el flag `general`.
+
+De paso, el selector de sede dejó de ser decorativo: su valor llega a la consulta de disponibilidad.
+
+## VIGENTE — El token de integración sigue siendo estático
+
+Es el único de los riesgos técnicos que queda abierto, y necesita una decisión de diseño: caducidad
+fija, o varios tokens con revocación individual. Ver `docs/evidencia/seguridad-contenido-no-confiable.md`.

@@ -99,8 +99,10 @@ Estas no son medidas añadidas al final: son la razón por la que la integració
 | El payload de salida **no lleva documento ni teléfono** | Un correo mal dirigido no filtra el documento de identidad de nadie |
 | El resumen diario devuelve **solo conteos** | WF-003 no necesita, y no recibe, datos de ningún paciente |
 | El webhook de salida es **asíncrono y no propaga errores** | n8n caído o lento no puede impedir que un ADMIN apruebe una cita |
-| El webhook de entrada exige **Header Auth** | Conocer la URL no basta para provocar correos a nombre de la institución |
-| El payload va **firmado con HMAC-SHA256** | El workflow puede comprobar que el evento viene de este backend |
+| El webhook de entrada exige **JWT verificado por n8n** | Conocer la URL no basta: hay que poder firmar con el secreto |
+| El token vive **dos minutos** | Un token capturado deja de servir casi de inmediato |
+| El contenido del correo va **escapado** | Un nombre con marcado no puede inyectar HTML en el mensaje |
+| Hay **límite de peticiones** por IP | Probar el token de servicio en bucle se corta con `429` |
 | WF-002 responde **422 a un evento desconocido** | Un evento que el workflow no entiende no produce un correo improvisado |
 | Las credenciales **no están en ningún JSON** | Importar o compartir un workflow no entrega acceso a nada |
 
@@ -115,23 +117,61 @@ No caduca ni se renueva. Si se filtra, da acceso de lectura a los datos de citas
 consultable hasta que alguien lo cambie a mano. **Mitigación parcial:** es de solo lectura y de
 alcance acotado. **Lo que falta:** rotación, caducidad y registro de uso.
 
-### 4.2 La firma HMAC se emite pero nadie la verifica todavía
+### 4.2 ~~La firma HMAC se emite pero nadie la verifica~~ — RESUELTO
 
-El backend firma el payload en `X-Signature`. WF-002 **no comprueba esa firma**: se apoya en el
-Header Auth del webhook. Mientras eso siga así, la firma es una capa preparada pero inactiva, y
-decir que el webhook está «firmado» sería engañoso.
+Era el riesgo más incómodo, porque describir el webhook como «firmado» cuando nada comprobaba la
+firma es decir algo falso.
 
-### 4.3 El contenido del correo no está escapado
+**No se resolvió verificando el HMAC, sino cambiando el mecanismo.** Verificar un HMAC dentro de n8n
+exige que un nodo Code tenga el secreto, y meterlo ahí lo dejaría dentro del JSON versionado: la
+defensa se habría pagado rompiendo la regla de no versionar credenciales.
 
-WF-002 inserta `patientName`, `specialtyName` y `reason` en HTML sin escapar. El `reason` lo escribe
-un ADMIN y los nombres vienen del registro, así que el riesgo no es un atacante anónimo, pero
-tampoco es cero. En un entorno real esto se escapa antes de redactar.
+En su lugar, el webhook pasa a la **autenticación JWT nativa** de n8n. El backend emite un token
+HS256 de dos minutos en `Authorization: Bearer`, firmado con `STATUS_WEBHOOK_SECRET`, y n8n verifica
+firma y `exp` por sí mismo con el secreto guardado como credencial. El `X-Signature` se retiró.
 
-### 4.4 No hay límite de peticiones ni en la integración ni en la recuperación
+Que el HMAC sobre el cuerpo desaparezca no deja un hueco: sin el secreto no se puede construir
+**ninguna** petición válida, y la integridad del cuerpo en tránsito la cubre TLS. El HMAC solo
+añadiría algo frente a un intermediario capaz de alterar el cuerpo conservando un token válido, que
+es precisamente lo que TLS impide.
 
-Nada impide intentar el token de integración en bucle, ni pedir recuperación de contraseña de forma
-masiva. Lo segundo permitiría generar tokens de recuperación en cantidad, aunque no leerlos. En un
-entorno real: *rate limiting* por IP y por cuenta.
+### 4.3 ~~El contenido del correo no está escapado~~ — RESUELTO
+
+El nodo `Normalizar y escapar` de WF-002 convierte a entidades HTML los campos que van al cuerpo del
+correo, en un solo sitio. Comprobado con una carga hostil: `<script>alert(1)</script>` en `reason`
+sale como `&lt;script&gt;alert(1)&lt;/script&gt;`.
+
+El correo del destinatario queda **sin escapar a propósito**: va al campo `sendTo`, no al HTML, y
+escaparlo lo convertiría en una dirección inválida.
+
+### 4.4 ~~No hay límite de peticiones~~ — RESUELTO
+
+`RateLimitFilter` limita por IP y por grupo de ruta: 5 por minuto en `/api/auth/recovery/**` y 60 en
+`/api/v1/integrations/**`, configurables. Devuelve `429` con `Retry-After`.
+
+Un detalle de orden que importa: el filtro se registra en `-200`, **por delante de Spring Security**,
+cuya cadena está en `-100`. La primera versión iba después, y entonces Security respondía `403` a un
+token inválido antes de que el contador lo viera: el límite no frenaba a quien prueba credenciales en
+bucle, que es justo el abuso que debe cortar. Lo descubrió una prueba que esperaba `429` y recibió
+`403`.
+
+Sus dos limitaciones están asumidas: el contador es en memoria, así que no se comparte entre
+instancias, y una ventana fija admite el doble del cupo justo en el salto entre ventanas. Un entorno
+real usaría un contador compartido y una ventana deslizante.
+
+### 4.4-bis Un secreto corto desactivaba el webhook en silencio — RESUELTO
+
+Apareció al verificar el JWT en vivo. HS256 exige una clave de 256 bits, y el secreto que había
+configurado era más corto: cada notificación lanzaba `WeakKeyException`, se registraba como aviso y
+**el webhook no funcionaba nunca**. Lo único que lo delataba era una línea de log por cita.
+
+Ahora la longitud se valida **una vez al arrancar**. Si la URL está configurada y el secreto tiene
+menos de 32 caracteres, el notificador queda desactivado y lo dice con un `ERROR` explícito. Se
+desactiva en lugar de enviar sin firmar, porque un evento sin autenticar sería peor que ninguno.
+
+No se falla el arranque a propósito: eso detendría la operación clínica por una
+notificación mal configurada, que es exactamente lo contrario del principio con el que se diseñó este
+componente.
 
 ### 4.5 El canal del token de recuperación es un canal de laboratorio
 

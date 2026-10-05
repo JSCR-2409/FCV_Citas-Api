@@ -176,3 +176,33 @@ invalido que rompia la compilacion. Agregado como paso 5/5 y probado en FAIL y P
 
 **HECHO:** Backlog final: 32 HU `Completada` y 2 `En validación` (HU-032 y HU-034, por topologia de
 red). Ninguna queda `Pendiente de aprobación`. Suite de 168 pruebas de backend y 8 de frontend.
+
+## 2026-10-04 — Repaso posterior a S6: cerrar riesgos residuales
+
+**HECHO — correccion de una evidencia propia.** Las tres primeras ejecuciones controladas de WF-002 se
+lanzaron pasando el cuerpo en `inputs.webhookData.body`, y el cuerpo **nunca llego**: el nodo Webhook
+emitio `{}` y las tres cayeron por la rama del payload incompleto. Yo habia registrado que la primera
+enrutaba a cancelacion y la tercera al `422`, y era falso. El error de fondo: dar por buena una
+ejecucion `success` sin mirar los datos, cuando un payload vacio por la rama de rechazo tambien
+termina segun su diseno. Las cuatro ramas se reverificaron inspeccionando `runData`.
+
+**DECISION:** El webhook pasa de una cabecera estatica a la autenticacion JWT nativa de n8n. Verificar
+el HMAC exigiria que un nodo Code tuviera el secreto, y meterlo ahi lo dejaria dentro del JSON: la
+defensa se habria pagado rompiendo la regla de no versionar credenciales. El `X-Signature` se retira.
+
+**HECHO:** El contenido del correo se escapa en un solo nodo. Verificado con una carga hostil.
+
+**HECHO:** `RateLimitFilter` con cupo por IP. Se registra por delante de Spring Security porque en la
+primera version iba despues y el `403` de un token invalido se adelantaba al contador, de modo que el
+limite no frenaba el abuso que debe cortar. Lo descubrio una prueba que esperaba `429`.
+
+**HECHO:** Un secreto de menos de 32 caracteres hacia fallar HS256 en cada notificacion, con un aviso
+por cita y el webhook sin funcionar nunca. Ahora se valida al arrancar y el notificador queda
+desactivado con un `ERROR` explicito, en lugar de enviar sin firmar.
+
+**HECHO:** El formulario de reserva deja de traducir nombres a identificadores con un objeto literal.
+Se puebla de `/catalogs/specialties` y el endpoint lo decide el flag `general`, no `specialtyId === 1`,
+que enviaba cualquier general distinta de la primera al endpoint de especializadas. El selector de
+sede deja de ser decorativo.
+
+**HECHO:** Suite de 168 a 173 pruebas de backend.
