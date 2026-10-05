@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import co.fcv.citas.user.User;
-import co.fcv.citas.user.UserRepository;
+import co.fcv.citas.adapters.out.persistence.User;
+import co.fcv.citas.adapters.out.persistence.UserRepository;
 
 /**
  * HU-006 — Recuperacion de contrasena con token temporal de un solo uso.
@@ -37,10 +37,10 @@ public class PasswordRecoveryService {
   private final JdbcTemplate db;
   private final UserRepository users;
   private final PasswordEncoder encoder;
-  private final co.fcv.citas.session.RefreshSessionRepository sessions;
+  private final co.fcv.citas.adapters.out.persistence.RefreshSessionRepository sessions;
   private final boolean exposeToken;
 
-  public PasswordRecoveryService(JdbcTemplate db, UserRepository users, PasswordEncoder encoder, co.fcv.citas.session.RefreshSessionRepository sessions,
+  public PasswordRecoveryService(JdbcTemplate db, UserRepository users, PasswordEncoder encoder, co.fcv.citas.adapters.out.persistence.RefreshSessionRepository sessions,
                                  org.springframework.core.env.Environment env) {
     this.db = db;
     this.users = users;
@@ -104,7 +104,7 @@ public class PasswordRecoveryService {
     // con un UPDATE directo: un UPDATE por JDBC no se refleja en las entidades que JPA ya tiene
     // cargadas, de modo que dentro de la misma transaccion la sesion seguiria pareciendo viva.
     var live = sessions.findByUserIdAndRevokedFalse(userId);
-    live.forEach(co.fcv.citas.session.RefreshSession::revoke);
+    live.forEach(co.fcv.citas.adapters.out.persistence.RefreshSession::revoke);
     sessions.saveAll(live);
   }
 }

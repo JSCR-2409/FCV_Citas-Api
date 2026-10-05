@@ -239,3 +239,44 @@ prueba se retiro poniendo el nuevo delante, verificando que los dos valian, y bo
 desechable paso a `403` y el vigente siguio en `200`, sin interrupcion.
 
 **HECHO:** Backlog: **las 34 HU en `Completada`**. Suite de 177 pruebas de backend.
+
+## 2026-10-04 — Arquitectura hexagonal
+
+**HECHO:** `RESTRICCIONES_TECNICAS.md` la exige en su lista de Definition of Architecture, de modo que
+no era opcional. Estructura nueva: `domain` sin Spring ni JPA ni HTTP, `application` con casos de uso y
+puertos de salida, y `adapters` para REST, seguridad, persistencia y notificacion.
+
+**HECHO:** Al dominio fueron las reglas que vivian como condiciones dentro de un `WHERE`: estados
+terminales, que cita se puede cancelar, cuantas franjas necesita una duracion, con que estado nace una
+cita segun su especialidad, y que exige un rechazo. La pregunta «se puede cancelar esta cita» estaba
+escrita **tres veces** en tres clausulas SQL distintas, sin nada que garantizara que coincidian.
+
+**DECISION:** Las consultas de proyeccion —bandejas, agenda, auditoria, catalogos— no fueron al
+dominio. No contienen reglas: son lecturas con filtros, y modelarlas habria sido inventar una capa sin
+contenido.
+
+**DECISION:** Spring Data JPA persiste el estado de las citas, con `AppointmentEntity` y su
+`JpaRepository`. La excepcion es el reclamo de franjas, que sigue siendo un `UPDATE` condicional: la
+guarda dentro de la propia escritura es lo que sostiene RN-01, y expresarlo con entidades dejaria de
+ser atomico. Ese SQL vive en un adaptador, que es justamente el punto.
+
+**DECISION:** Los casos de uso llevan `@Service` y `@Transactional`. Es una concesion consciente: lo
+que la restriccion exige es que el **dominio** no dependa de adaptadores, y `co.fcv.citas.domain` no
+importa nada de Spring, JPA, Jakarta ni `java.sql`.
+
+**HECHO:** `HexagonalBoundariesTest` lee el codigo fuente y falla si una dependencia va en el sentido
+prohibido. Sin ella la restriccion seria una intencion. Comprobado que **no es vacua**: al introducir
+un import de Spring en el dominio, falla senalando fichero y linea.
+
+**HECHO:** `AppointmentDomainTest` ejerce 25 reglas en 0,03 segundos, frente a 3-7 segundos de cada
+clase con `@SpringBootTest`. Esa diferencia es la medida practica de la independencia.
+
+**HECHO:** Eliminado `AppointmentStatusLog`, que duplicaba `StatusHistoryPort`: dos formas de escribir
+la misma fila de auditoria.
+
+**HECHO:** Las 207 pruebas en verde y verificado en vivo contra MySQL, donde `ddl-auto: validate`
+comprueba el mapeo de la entidad nueva. Reserva, RN-01, especialidad no elegible y cancelacion doble
+responden con los mismos codigos que antes: el contrato no cambio.
+
+**PREGUNTA ABIERTA:** Quedan cinco clases en `auth` y `config` sin reubicar. Es mecanico y no afecta a
+la direccion de las dependencias, que ya es correcta y esta verificada.

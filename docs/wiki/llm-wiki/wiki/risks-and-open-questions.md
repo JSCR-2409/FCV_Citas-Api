@@ -37,10 +37,19 @@ El modelo de referencia define `refresh_tokens`; el código usa `refresh_session
 Se mantiene `refresh_sessions` como decisión registrada. `V7` no crea `refresh_tokens` para no
 dejar esquema muerto, así que un entorno solo-Flyway no tendrá esa tabla.
 
-## RIESGO — La arquitectura no es hexagonal
+## RESUELTO — La arquitectura es hexagonal
 
-`RESTRICCIONES_TECNICAS.md` la exige. La implementación son paquetes planos por feature con SQL
-embebido en los controladores mediante `JdbcTemplate`. No se ha abordado.
+`RESTRICCIONES_TECNICAS.md` la exige en su *Definition of Architecture*. Durante S3, S4 y S5 el
+backend fueron paquetes planos con SQL en línea en los controladores, y quedó registrado aquí sin
+abordar. Se cumplió al cerrar el proyecto: `domain`, `application` con sus puertos, y `adapters` para
+REST, seguridad, persistencia y notificación.
+
+El límite no solo está documentado: `HexagonalBoundariesTest` lee el código y falla si una dependencia
+va en el sentido prohibido. Verificado que la prueba no es vacua. Detalle en
+[`architecture.md`](architecture.md).
+
+Queda pendiente reubicar cinco clases de `auth` y `config`, que es mecánico y no afecta a la dirección
+de las dependencias.
 
 ## Estado de verificación pendiente de S3
 
