@@ -2,7 +2,7 @@
 id: HU-005
 tipo: historia-de-usuario
 titulo: "Renovar y cerrar sesión"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-002-identidad-sesion-y-perfil]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -54,13 +54,14 @@ Dado un refresh ausente, inválido, vencido o revocado, cuando se usa, entonces 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | `loginReturnsAccessAndRefreshAndRefreshRotates`: el refresh rota y el anterior queda inválido | Rotación atómica |
+| CA-02 | Cumplido | `AuthControllerTest.logoutRevokesTheRefreshToken` | Prueba añadida al cerrar S6: no existía |
+| CA-03 | Cumplido | `invalidCredentialsAndMalformedRefreshAreRejected` y `logoutWithAnUnknownRefreshIsSilent` | 401 al reutilizar, 204 silencioso al cerrar |
+| DoD | Cumplido | 4/4 | El refresh se almacena solo como SHA-256 |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-04 — Regularizada al cerrar S6: el alcance de S2 estaba implementado desde `f299ec9` sin evidencia registrada.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: rotación y persistencia concreta del refresh token.

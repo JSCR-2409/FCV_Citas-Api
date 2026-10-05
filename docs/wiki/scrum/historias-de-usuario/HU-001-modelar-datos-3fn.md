@@ -2,7 +2,7 @@
 id: HU-001
 tipo: historia-de-usuario
 titulo: "Modelar datos en 3FN"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-001-fundacion-de-datos-y-contrato-rest]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento I — Base especificable"
@@ -54,13 +54,14 @@ Dado una cita de 60 min o una reprogramación pendiente, cuando se examine el di
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | 21 tablas del esquema vigente cubren las capacidades del PRD; ninguna columna guarda listas | `database/reference/db.sql` y migraciones V1-V9 |
+| CA-02 | Cumplido | `database/REQUISITOS_NORMALIZACION_3FN.md` y `docs/wiki/llm-wiki/wiki/data-model.md` | Claves y cardinalidades trazables |
+| CA-03 | Cumplido | `AppointmentBookingRulesTest` (slots consecutivos de 60 min) y `ReschedulingTest` (retención doble) | 31 pruebas entre las dos |
+| DoD | Cumplido | 4/4 | El esquema soporta las seis HU de ciclo de cita |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-04 — Regularizada al cerrar S6: el alcance de S2 estaba implementado desde `f299ec9` sin evidencia registrada.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: qué atributos son snapshots frente a FK y cómo se materializa la exclusión de reserva.

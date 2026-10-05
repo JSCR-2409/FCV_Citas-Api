@@ -7,4 +7,20 @@ import org.junit.jupiter.api.*; import org.springframework.beans.factory.annotat
  @Test void duplicateEmailAndDocumentAreRejected() throws Exception {mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(registration("dup@test.local","1002"))).andExpect(status().isCreated()); mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(registration("dup@test.local","1003"))).andExpect(status().isConflict()); mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(registration("other@test.local","1002"))).andExpect(status().isConflict());}
  @Test void loginReturnsAccessAndRefreshAndRefreshRotates() throws Exception {mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(registration("login@test.local","1004"))).andExpect(status().isCreated()); String body=mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"login@test.local\",\"password\":\"ClaveSegura123\"}")).andExpect(status().isOk()).andExpect(jsonPath("$.accessToken",not(emptyString()))).andExpect(jsonPath("$.refreshToken",not(emptyString()))).andReturn().getResponse().getContentAsString(); String refresh=json.readTree(body).get("refreshToken").asText(); String renewed=mvc.perform(post("/api/auth/refresh").contentType(MediaType.APPLICATION_JSON).content("{\"refreshToken\":\""+refresh+"\"}")).andExpect(status().isOk()).andExpect(jsonPath("$.accessToken",not(emptyString()))).andReturn().getResponse().getContentAsString(); String rotated=json.readTree(renewed).get("refreshToken").asText(); Assertions.assertNotEquals(refresh,rotated); mvc.perform(post("/api/auth/refresh").contentType(MediaType.APPLICATION_JSON).content("{\"refreshToken\":\""+refresh+"\"}")).andExpect(status().isUnauthorized());}
  @Test void invalidCredentialsAndMalformedRefreshAreRejected() throws Exception {mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"missing@test.local\",\"password\":\"bad\"}")).andExpect(status().isUnauthorized()); mvc.perform(post("/api/auth/refresh").contentType(MediaType.APPLICATION_JSON).content("{\"refreshToken\":\"not-a-token\"}")).andExpect(status().isUnauthorized());}
+ /**
+  * HU-005 CA-02. No habia ninguna prueba de /api/auth/logout: el endpoint existia y nadie
+  * verificaba que el refresh dejara de servir, que es justamente lo unico que hace.
+  */
+ @Test void logoutRevokesTheRefreshToken() throws Exception {
+   mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(registration("logout@test.local","1005"))).andExpect(status().isCreated());
+   String body=mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"logout@test.local\",\"password\":\"ClaveSegura123\"}")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+   String refresh=json.readTree(body).get("refreshToken").asText();
+   mvc.perform(post("/api/auth/logout").contentType(MediaType.APPLICATION_JSON).content("{\"refreshToken\":\""+refresh+"\"}")).andExpect(status().isNoContent());
+   mvc.perform(post("/api/auth/refresh").contentType(MediaType.APPLICATION_JSON).content("{\"refreshToken\":\""+refresh+"\"}")).andExpect(status().isUnauthorized());
+ }
+
+ /** CA-03: cerrar sesion con un refresh que no existe no puede fallar ni revelar nada. */
+ @Test void logoutWithAnUnknownRefreshIsSilent() throws Exception {
+   mvc.perform(post("/api/auth/logout").contentType(MediaType.APPLICATION_JSON).content("{\"refreshToken\":\"inexistente\"}")).andExpect(status().isNoContent());
+ }
 }

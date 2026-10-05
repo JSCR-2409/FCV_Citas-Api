@@ -71,13 +71,18 @@ Las RN-01 a RN-12 aparecen en las reglas, criterios y DoD de [[HU-016-crear-bloq
 
 Las 34 HU se crearon en `Pendiente de aprobación`. S2, S3 y S4 deben seleccionar explícitamente una HU, respetar sus dependencias y actualizar su evidencia de validación.
 
-Estado del backlog al 2026-10-04, tras cerrar el alcance de S3, S4, S5 y S6:
+Estado del backlog al 2026-10-04, tras cerrar el alcance de S2 a S6:
 
 | Estado | HU | Criterio |
 |---|---|---|
-| `Completada` | HU-006 a HU-012, HU-013 a HU-031, HU-033 | CA verificados con pruebas automatizadas y DoD cumplida, incluida la UI correspondiente |
+| `Completada` | las 32 restantes | CA verificados con pruebas automatizadas y DoD cumplida, incluida la UI correspondiente |
 | `En validación` | HU-032, HU-034 | Workflow construido, validado y versionado; su CA-01 exige una ejecución contra una API alcanzable |
-| `Pendiente de aprobación` | HU-001 a HU-005 | Alcance de S2; implementadas en código, sin regularizar su evidencia |
+
+**Ninguna HU queda `Pendiente de aprobación`.** HU-001 a HU-005, el alcance de S2, estaban
+implementadas desde `f299ec9` sin evidencia registrada; se regularizaron al cerrar S6. Al hacerlo
+apareció un hueco real: **no existía ninguna prueba de `POST /api/auth/logout`**, el único endpoint
+cuya razón de ser es revocar el refresh. Se añadieron dos, de modo que el CA-02 de HU-005 pasó a tener
+respaldo en lugar de darse por bueno.
 
 **S3** cerró la agenda y la reserva: administración de profesionales y asignaciones, gestión de
 bloques, consulta de disponibilidad, cita general auto-aprobada, cita especializada en `REQUESTED` y

@@ -167,5 +167,12 @@ las de rechazo: un payload incompleto recibe `400` y un evento desconocido `422`
 **HECHO:** Los tres workflows quedan **inactivos** a proposito. S6 lo exige de forma literal y la
 salida esperada es un correo, que no se puede validar sin la credencial de Gmail.
 
-**HECHO:** Backlog: 29 HU `Completada`, 2 `En validación` (HU-032 y HU-034, por topologia de red) y 5
-`Pendiente de aprobación` (HU-001 a HU-005, alcance de S2).
+**HECHO:** Regularizadas HU-001 a HU-005, el alcance de S2, que estaban implementadas desde
+`f299ec9` sin evidencia registrada. Al hacerlo aparecio un hueco real: no existia ninguna prueba de
+`POST /api/auth/logout`, el unico endpoint cuya razon de ser es revocar el refresh. Se agregaron dos.
+
+**HECHO:** El hook del frontend no ejecutaba el build, y por eso dejo pasar un `angular.json`
+invalido que rompia la compilacion. Agregado como paso 5/5 y probado en FAIL y PASS.
+
+**HECHO:** Backlog final: 32 HU `Completada` y 2 `En validación` (HU-032 y HU-034, por topologia de
+red). Ninguna queda `Pendiente de aprobación`. Suite de 168 pruebas de backend y 8 de frontend.

@@ -2,7 +2,7 @@
 id: HU-002
 tipo: historia-de-usuario
 titulo: "Documentar contrato REST inicial"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-001-fundacion-de-datos-y-contrato-rest]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento I — Base especificable"
@@ -55,13 +55,14 @@ Dado filtros, concurrencia, retenciones o errores no especificados, cuando no ex
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | 14 contratos en `docs/contratos/`, uno por bloque funcional, con autorización y mensajes | Cada HU dependiente enlaza el suyo |
+| CA-02 | Cumplido | El frontend consume Spring directamente; no existe Express ni BFF en ningún `package.json` | Sin datos sensibles en los contratos |
+| CA-03 | Cumplido | `docs/wiki/llm-wiki/wiki/risks-and-open-questions.md` con las preguntas abiertas vivas y las resueltas | 4 resueltas en S4, 3 vigentes |
+| DoD | Cumplido | 4/4 | Contrato versionado en el repositorio de backend |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-04 — Regularizada al cerrar S6: el alcance de S2 estaba implementado desde `f299ec9` sin evidencia registrada.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: nomenclatura concreta de recursos, errores, paginación y exclusión ante reserva simultánea.

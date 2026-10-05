@@ -2,7 +2,7 @@
 id: HU-003
 tipo: historia-de-usuario
 titulo: "Registrar usuario"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-002-identidad-sesion-y-perfil]]"
 esfuerzo: Medio
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -54,13 +54,14 @@ Dado un registro, cuando se inspecciona persistencia, respuesta y logs aplicable
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | `AuthControllerTest.registerCreatesUserAndDoesNotExposePassword` | Rol USER asignado en el alta |
+| CA-02 | Cumplido | `AuthControllerTest.duplicateEmailAndDocumentAreRejected` | 409 por email y por documento |
+| CA-03 | Cumplido | La misma prueba comprueba que lo persistido es un hash BCrypt, no la contraseña | La respuesta es 201 sin cuerpo |
+| DoD | Cumplido | 4/4 | Verificado también en vivo contra MySQL |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-04 — Regularizada al cerrar S6: el alcance de S2 estaba implementado desde `f299ec9` sin evidencia registrada.
 
 ## Notas y decisiones
 - Los requisitos no fijan política de complejidad de contraseña; no se debe asumir sin aprobación.

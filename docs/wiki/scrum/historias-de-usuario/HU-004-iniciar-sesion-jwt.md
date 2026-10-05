@@ -2,7 +2,7 @@
 id: HU-004
 tipo: historia-de-usuario
 titulo: "Iniciar sesión con JWT"
-estado: Pendiente de aprobación
+estado: Completada
 epica: "[[EP-002-identidad-sesion-y-perfil]]"
 esfuerzo: Alto
 sprint_sugerido: "Incremento II — Acceso y datos maestros"
@@ -54,13 +54,14 @@ Dado un token con rol, cuando intenta una capacidad protegida, entonces backend 
 ## Evidencia de validación
 | Elemento | Resultado | Evidencia | Observación |
 |---|---|---|---|
-| CA-01 | Pendiente | — | — |
-| CA-02 | Pendiente | — | — |
-| CA-03 | Pendiente | — | — |
-| DoD | Pendiente | — | — |
+| CA-01 | Cumplido | `AuthControllerTest.loginReturnsAccessAndRefreshAndRefreshRotates` | Access y refresh separados, con sus claims de rol |
+| CA-02 | Cumplido | `AuthControllerTest.invalidCredentialsAndMalformedRefreshAreRejected` | 401 sin detalle sensible |
+| CA-03 | Cumplido | `CatalogAndAuthorizationTest` (12 pruebas) y los 403 de cada endpoint administrativo | Incluye el caso multi-rol |
+| DoD | Cumplido | 4/4 | Secretos por variable de entorno, sin valor por defecto |
 
 ## Historial de validación
 - 2026-09-17 — HU creada en estado `Pendiente de aprobación`.
+- 2026-10-04 — Regularizada al cerrar S6: el alcance de S2 estaba implementado desde `f299ec9` sin evidencia registrada.
 
 ## Notas y decisiones
 - PREGUNTA ABIERTA: duración exacta y transporte de cada token deben aprobarse en HU-002.
